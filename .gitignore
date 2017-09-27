@@ -1,0 +1,11 @@
+*.Rdata
+*.Rda
+*.rdata
+*.rda
+*.pyc
+*.log
+*.aux
+*.fls
+*.gz
+*.fdb_latexmk
+
