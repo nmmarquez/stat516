@@ -83,9 +83,22 @@ E[Y] & < Var[Y] \\
   \frac{\beta^{\alpha}}{\Gamma(\alpha)} {\lambda}^{\alpha-1}
   e^{-\beta \lambda}
   \frac{\lambda^{k} e^{-\lambda}}{k!} d\lambda \\
+  ~ \\
   & = \frac{\beta^{\alpha}}{\Gamma(\alpha) k!}
   \int_{0}^{\infty} {\lambda}^{\alpha + k -1}
-  e^{-\lambda(\beta + 1)} d\lambda
+  e^{-\lambda(\beta + 1)} d\lambda \\
+  ~ \\
+  & = \frac{\beta^{\alpha}}{\Gamma(\alpha) k!}
+  \frac{\Gamma (\alpha + k)}{(\beta + 1)^{a+k}}
+  \int_{0}^{\infty} \frac{(\beta + 1)^{a+k}}{\Gamma (\alpha + k)}
+  {\lambda}^{\alpha + k -1} e^{-\lambda(\beta + 1)} d\lambda
+  ~ \\
+  & = \frac{\beta^{\alpha}}{\Gamma(\alpha) k!}
+  \frac{\Gamma (\alpha + k)}{(\beta + 1)^{a+k}} \\
+  ~ \\
+  & = \frac{\Gamma(\alpha + k)}{\Gamma(\alpha)\Gamma(k+1)}
+  \Big{(}\frac{\beta}{\beta + 1}\Big{)}^{\alpha}
+  \Big{(}1 - \frac{\beta}{\beta + 1}\Big{)}^{k}
 \end{flalign*}
 
 \item {\it Br\'{e}maud, 1.7.1.}
