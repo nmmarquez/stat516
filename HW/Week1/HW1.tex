@@ -160,18 +160,16 @@ $$\Pr( X_1 \leq X_2,...,X_1 \leq X_n,X_1 \leq x) = \int_{-\infty}^x \Pr(X_2 \geq
  & \therefore ~ Z \sim exp(rate=\sum_{n=1}^{N} \lambda_i )
  ~ \\
  ~ \\
- & if ~ (X_1, ..., X_N) ind \\
- & then ~ P(X_1 < X_2, ..., X_1 < X_N) = 1/N \\
- & \therefore  ~ J \sim 1_{[1, 2, ..., N]} \\
+ P(X_j \leq X_{i \neq j}, X_j \leq x) & = \int^x_\infty f_1(y) \prod_{i \neq j}^{N} P(X_i \geq y) dy \\
+ & = \int^x_0 PDF_{X_j}(y) \prod_{i \neq j}^{N} (1 - CDF_{X_i}(y)) dy \\
+ & = \lambda_j \int^x_0 \prod_{i = 1}^{N} e^{-\lambda_i x} \\
+ & = \lambda_j \int^x_0 e^{-x \sum_{i=1}^{N} \lambda_i} \\
+ & = \frac{\lambda_j}{\sum_{i=1}^{N} \lambda_i} (1 - e^{-x\sum_{i=1}^{N} \lambda_i}) \\
  ~ \\
- ~ \\
- P(X_1 \leq X_2, ..., X_1 \leq X_N, X_1 \leq x) & = \int^x_\infty P(X_2 \geq y) \times ... \times P(X_n \geq y) f_1(y) dy \\
- & = \int^x_0 (1 - CDF_{X_2}(y)) \times ... \times (1- CDF_{X_N}(y)) \times PDF_{X_1}(y) dy \\
- & = \int^x_0 \prod_{i=1}^{N} e^{-\lambda_i x} \\
- & = \int^x_0 e^{-x \sum_{i=1}^{N} \lambda_i} \\
- & = \frac{1}{N} (1 - e^{-x\sum_{i=1}^{N} \lambda_i}) \\
- & = P(Z \leq x, J = k) \\
- \therefore ~ P(J, Z) = P(J)P(Z)
+ P(J=k) & = \int_0^{\infty}P(X_j = x, J=k) dx \\
+  & = \frac{\lambda_j}{\sum_{i=1}^{N} \lambda_i} (1 - e^{-\infty}) \\
+  & = \frac{\lambda_j}{\sum_{i=1}^{N} \lambda_i} \\
+  \therefore P(Z,J) & = P(Z) P(J)
 \end{flalign*}
 
 \item {\it Br\'{e}maud, 1.8.1: Applying the SLLN}
