@@ -1,0 +1,274 @@
+\documentclass{article} % Uses 10pt
+
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{url}
+\usepackage{amsmath,amssymb,kbordermatrix}
+\textwidth6.5in
+\textheight=9.7in  % text height can be bigger for a longer letter
+\setlength{\topmargin}{-0.3in}
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\headsep = 20pt
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+\renewcommand{\baselinestretch}{1.4}
+
+\setlength{\oddsidemargin}{0in}
+
+\oddsidemargin  0.0in \evensidemargin 0.0in
+
+%%\parindent0em
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.0pt}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{}
+\rfoot{}
+\cfoot{}
+
+\newcommand{\ind}{\mbox{$\perp \kern-5.5pt \perp$}}
+
+\newcommand{\sectionname}[1]{\vspace{0.5cm} \noindent {\bf #1}}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large Stat 516, Homework 2}
+\end{center}
+\sectionname{Due date}:  Thursday, October 12.
+
+\noindent {\bf Note}: Do this homework in \emph{pairs}; two students
+turning in a single joint solution.  No two students from the same
+department/program may work together.  (Exceptions as needed based on
+the make-up of the class.)
+
+
+
+\begin{enumerate}
+\item {\it Guttorp, 1.6.2: Consistent finite-dimensional
+    distributions}
+
+  Let $\lambda\in(0,\infty)$.  For any $n\in\mathbb{N}$, real numbers
+  $0\le t_1<\dots<t_n$ and integers $r_1,\dots,r_n$, define the
+  probability
+  \[
+  p_{t_1,\dots,t_n}(r_1,\dots,r_n) \;=\;
+  \begin{cases}
+    \displaystyle
+    \frac{\lambda^{r_n}
+      e^{-\lambda t_n} t_1^{r_1}(t_2-t_1)^{r_2-r_1}\dots
+      (t_n-t_{n-1})^{r_n-r_{n-1}}}{r_1!(r_2-r_1)! \dots
+      (r_n-r_{n-1})!} &\text{ if } \ 0\le r_1\le \dots\le r_n,\\
+    0 &\text{ otherwise}.
+  \end{cases}
+  \]
+  For unordered reals $t_1,\dots,t_n\ge 0$, define
+  $p_{t_1,\dots,t_n}(r_1,\dots,r_n)=p_{t_{\pi(1)},\dots,t_{\pi(n)}}(r_{\pi(1)},\dots,r_{\pi(n)})$
+  where $\pi$ is the permutation such that
+  $t_{\pi(1)}<t_{\pi(2)}<\dots<t_{\pi(n)}$.
+  \begin{enumerate}
+  \item Show that these probabilities determine a consistent family of
+    finite-dimensional distributions that define a stochastic process
+    $(X_t:t\in[0,\infty))$, where $P(X_t\in\{0,1,2,\dots\})=1$ for all
+    $t\ge 0$.
+
+A finite-dimensional distribution can be shown to exist if a stochastic process
+satisfies symmetry and marginalization. Symmetry can be shown to exist as follows
+
+if
+$$
+p_{t_1,\dots,t_n}(r_1,\dots,r_n)=p_{t_{\pi(1)},\dots,t_{\pi(n)}}(r_{\pi(1)},\dots,r_{\pi(n)})
+$$
+and
+$$
+p_{t_{\zeta(1)},\dots,t_{\zeta(n)}}(r_{\zeta(1)},\dots,r_{\zeta(n)}=
+p_{t_{\eta(\zeta_1)},\dots,t_{\eta(\zeta_n)}}(r_{\eta(\zeta_1)},\dots,r_{\eta(\zeta_n)})
+$$
+then
+$$
+p_{t_1,\dots,t_n}(r_1,\dots,r_n)=p_{t_{\phi(1)},\dots,t_{\phi(n)}}(r_{\phi(1)},\dots,r_{\phi(n)})
+$$
+
+Where $\phi$ is any permutation function as it can be seen that any permuation
+which is ordered is equal to itself in probability and therefore all
+permutations are equal to each other.
+
+The process can be shown to satisy marginlization as
+
+\begin{flalign*}
+  & P(X_{a_1} \in A_1, ..., X_{a_n} \in A_{n}, X_{a_{n+1}} \in \mathbb{R}) \\
+  & = P(X_{a_1} \in A_1, ..., X_{a_n} \in A_{n}) P(X_{a_{n+1}} \in \mathbb{R}) \\
+  & = P(X_{a_1} \in A_1, ..., X_{a_n} \in A_{n}) \int_{0}^{\infty} f(x) dx \\
+  & = P(X_{a_1} \in A_1, ..., X_{a_n} \in A_{n})
+\end{flalign*}
+
+
+
+  \item What is the joint distribution of $X_t$ and $X_{t+s}-X_t$ for
+    $s,t>0$?
+
+Because this is a consistent family of finite-dimensional distributions. Then
+
+$$
+P(X_{t + s} - X_{t} = k) = (X_{s} - X_{0} = k) = P(X_{s} = k)
+$$
+
+therefore
+\begin{flalign*}
+P(X_t = x, X_{t + s} - X_{t} = k) & = P(X_t = x, X_{s} = k) \\
+& = \frac{\lambda^k s^k e^{-\lambda s}}{k!}
+\frac{\lambda^x t^x e^{-\lambda t}}{x!} \\
+& = \frac{\lambda^{k+x} s^k t^x e^{-\lambda (s+t)}}{x!k!}
+\end{flalign*}
+
+  \end{enumerate}
+
+\item {\em Conditional independence}
+  \begin{enumerate}
+  \item Let $(X_1,X_2,X_3)$ be a multivariate normal random vector
+    with positive definite covariance matrix $\Sigma=(\sigma_{ij})$
+    and correlations
+    $\rho_{ij}=\frac{\sigma_{ij}}{\sqrt{\sigma_{ii}\sigma_{jj}}}$.
+    Show that $X_1\ind X_2\,|\,X_3$ if and only if
+    $\rho_{12}=\rho_{13}\rho_{23}$.
+
+
+if \\
+$$
+X_1 \ind X_2 | X_3 \\
+$$
+then \\
+\begin{flalign*}
+  \Sigma^{-1}_{1,2} = 0  & = \frac{\sigma_{1,2}\sigma_{3,3} - \sigma_{1,3}\sigma_{2,3}}{Det(\Sigma)} \\
+  & = \sigma_{1,2}\sigma_{3,3} - \sigma_{1,3}\sigma_{2,3} \\
+  \sigma_{1,2}\sigma_{3,3} & = \sigma_{1,3}\sigma_{2,3} \\
+  \rho_{1,2}\sqrt{\sigma_{1,1}\sigma_{2,2}}\sigma_{3,3} & =
+  \rho_{1,3}\sqrt{\sigma_{1,1}\sigma_{3,3}} \rho_{2,3}\sqrt{\sigma_{2,2}\sigma_{3,3}}\\
+  \rho_{1,2} & = \rho_{1,3} \rho_{2,3}
+\end{flalign*}
+
+  \item Let $(X_1,X_2,X_3,X_4)$ be a multivariate normal random vector
+    with positive definite covariance matrix $\Sigma=(\sigma_{ij})$.
+    Use the fact from (a) to derive that
+    \[
+      X_1\ind X_2\,|\,X_3,\;
+      X_2\ind X_3\,|\,X_4,\;
+      X_3\ind X_4\,|\,X_1,\;
+      X_1\ind X_4\,|\,X_2  \quad\implies\quad
+      X_1\ind X_2.
+    \]
+
+\begin{flalign*}
+\Sigma_{1,2} & = \frac{
+  \sigma^{-1}_{1,2} \sigma^{-1}_{3,4} \sigma^{-1}_{3,4} +
+  \sigma^{-1}_{1,3} \sigma^{-1}_{2,3} \sigma^{-1}_{4,4} +
+  \sigma^{-1}_{1,4} \sigma^{-1}_{3,3} \sigma^{-1}_{2,4} -
+  \sigma^{-1}_{1,2} \sigma^{-1}_{3,3} \sigma^{-1}_{4,4} -
+  \sigma^{-1}_{1,3} \sigma^{-1}_{3,4} \sigma^{-1}_{2,4} -
+  \sigma^{-1}_{1,4} \sigma^{-1}_{2,3} \sigma^{-1}_{3,4}
+  }{det(\Sigma^{-1})} \\
+  & = \frac{
+    0 * 0 * \sigma^{-1}_{3,4} +
+    \sigma^{-1}_{1,3} 0 \sigma^{-1}_{4,4} +
+    0 \sigma^{-1}_{3,3} \sigma^{-1}_{2,4} -
+    0 \sigma^{-1}_{3,3} \sigma^{-1}_{4,4} -
+    \sigma^{-1}_{1,3} 0 \sigma^{-1}_{2,4} -
+    0 * 0 \sigma^{-1}_{3,4}
+    }{det(\Sigma^{-1})} \\
+  & = 0 \\
+  \therefore \\
+  X_1 & \ind X_2
+\end{flalign*}
+  \item Give an example of a joint distribution for three binary
+    random variables (r.v.) $X$, $Y$ and $Z$ such that $X\ind Y$ and
+    $X\ind Z$ but
+    $X$ is not independent of the pair $(Y,Z)$.
+
+for $0 < p < 1$
+
+if
+\begin{flalign*}
+  Z \ind Y \\
+  P(Z=z) = .5 \\
+  P(Y=y) = .5
+\end{flalign*}
+
+\[
+P(X=x, Z=x, Y=y) \;=\;
+\begin{cases}
+  \displaystyle
+  .25 p^{x} (1-p)^{1-x} &\text{ if } Z == Y,\\
+  .25(1-p)^{x} p^{1-x} &\text{ otherwise}.
+\end{cases}
+\]
+
+then
+
+\begin{flalign*}
+  P(X=x) = .5 \\
+  P(X=x | Z) = .5 \\
+  P(X=x | Y) = .5 \\
+\end{flalign*}
+
+and
+
+\[
+P(X=x | (Z, Y)) \;=\;
+\begin{cases}
+  \displaystyle
+  p^x (1-p)^{1-x} &\text{ if } Z == Y,\\
+  (1-p)^x p^{1-x} &\text{ otherwise}.
+\end{cases}
+\]
+
+  \end{enumerate}
+
+\item {\em Conditional independence and graph separation}.\\
+  Solve the
+  following problem from Guttorp's book using what you have learned
+  about conditional independence and graph separation for
+  distributions that factorize according to a graph.
+
+   (Guttorp, 2.14.1) Keeping with the notation used in the lectures, prove that the requirement we made in the definition of a Markov chain $(X_n)_{n\ge 0}$ (compare the slide entitled ``Markov chains'') is equivalent to each of the following two statements:
+\begin{enumerate}
+\item
+Let $T_1\subset\{n+1,n+2,\dots\}$ be a finite set of times later than $n$, and $T_0\subseteq\{0,\dots,n\}$ a set of times less than or equal to $n$.  Let $t_0=\max T_0$.  Then
+\[
+\Pr(X_k=i_k\,\forall k\in T_1\,|\, X_l=i_l\,\forall l\in T_0)=\Pr(X_k=i_k\,\forall k\in T_1\,|\, X_{t_0}=i_{t_0})
+\]
+for all collections of states $i_k,i_l,i_{t_0}$ for which the conditional probabilities are well-defined.
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+\item
+Let $T_1\subset\{n+1,n+2,\dots\}$ be a finite set of times later than $n$, and $T_0\subseteq\{0,\dots,n-1\}$ a set of times prior to $n$.   Then
+\begin{multline*}
+\Pr(X_k=i_k\,\forall k\in T_1,\: X_l=i_l\,\forall l\in T_0\,|\, X_n=i_n)\\
+=\Pr(X_k=i_k\,\forall k\in T_1\,|\, X_n=i_n)\Pr(X_l=i_l\,\forall l\in T_0\,|\, X_n=i_n).
+\end{multline*}
+for all collections of states $i_k,i_l,i_n$ for which the conditional probabilities are well-defined.
+
+\end{enumerate}
+
+
+\end{enumerate}
+
+\end{document}
