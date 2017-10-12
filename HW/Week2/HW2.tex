@@ -99,7 +99,8 @@ Where $\phi$ is any permutation function as it can be seen that any permuation
 which is ordered is equal to itself in probability and therefore all
 permutations are equal to each other.
 
-The process can be shown to satisy marginlization as
+The process can be shown to satisy marginlization as it is a poisson point process 
+where the individual terms are independent and thus the following holds.
 
 \begin{flalign*}
   & P(X_{a_1} \in A_1, ..., X_{a_n} \in A_{n}, X_{a_{n+1}} \in \mathbb{R}) \\
@@ -185,6 +186,22 @@ then \\
   \therefore \\
   X_1 & \ind X_2
 \end{flalign*}
+
+Alternatively, given the independence statements made above we have
+
+\begin{flalign*}
+\rho_{12} = \rho_{13} \rho_{23} \\
+\rho_{23} = \rho_{24} \rho_{34} \\
+\rho_{34} = \rho_{13} \rho_{14} \\
+\rho_{14} = \rho_{12} \rho_{24} \\
+\rho_{12}(\rho_{13}^2 \rho_{24}^2 - 1) = 0 
+\end{flalign*}
+
+We know that $(\rho_{13}^2 \rho_{24}^2 - 1)$ can not be zero because 
+$|\rho_{13}|$ and $|\rho_{24}|$ would need to be $1$ which would 
+imply linear dependence in $\Sigma$. Therfore, $\rho_{12}$ must
+be $0$ which implies $X_1 \ind X_2$.
+
   \item Give an example of a joint distribution for three binary
     random variables (r.v.) $X$, $Y$ and $Z$ such that $X\ind Y$ and
     $X\ind Z$ but
@@ -243,21 +260,27 @@ Let $T_1\subset\{n+1,n+2,\dots\}$ be a finite set of times later than $n$, and $
 \Pr(X_k=i_k\,\forall k\in T_1\,|\, X_l=i_l\,\forall l\in T_0)=\Pr(X_k=i_k\,\forall k\in T_1\,|\, X_{t_0}=i_{t_0})
 \]
 for all collections of states $i_k,i_l,i_{t_0}$ for which the conditional probabilities are well-defined.
+
 ~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
-~\\
+
+If we take $T_1 = \{n+1\}$ and $T_0 = \{0 ... n\}$ we have 
+
+$$
+Pr(X_{n+1} = i_{n+1} | X_n=i_n ... X_0 = i_0) = Pr(X_{n+1} = i_{n+1} | X_n=i_n)
+$$
+
+Which is equivalent to the definition of a markov chain.
+
+This random vector obeys the Markov property as shown by the following graph.
+
+$$
+X_L, L \in T_0, L \neq t_0 ~~~~~~~~~~~~ X_{t_0} ~~~~~~~~~~~~~~~~~~ X_k, k \in T_1
+$$
+
+There is no path between $T_0$ and $T_1$ with out going through $x_{t_0}$ for the entire set of values 
+that $T_0$, $T_1$ and $t_0$ can take and therefore any value that they take in their respective sets 
+must also hold the same property.
+
 \item
 Let $T_1\subset\{n+1,n+2,\dots\}$ be a finite set of times later than $n$, and $T_0\subseteq\{0,\dots,n-1\}$ a set of times prior to $n$.   Then
 \begin{multline*}
@@ -265,6 +288,31 @@ Let $T_1\subset\{n+1,n+2,\dots\}$ be a finite set of times later than $n$, and $
 =\Pr(X_k=i_k\,\forall k\in T_1\,|\, X_n=i_n)\Pr(X_l=i_l\,\forall l\in T_0\,|\, X_n=i_n).
 \end{multline*}
 for all collections of states $i_k,i_l,i_n$ for which the conditional probabilities are well-defined.
+
+~\\
+
+If we take $T_1 = \{n+1\}$ and $T_0 = \{ 0, ..., n-1\}$, we have  
+
+\begin{flalign*}
+Pr(X_{n+1}=i_{n+1}, X_{n-1}=i_{n-1}, ..., X_0=i_{0} | X_n=i_n) = \\
+ Pr(X_{n+1}=i_{n+1} | X_n=i_n)Pr(X_{n-1}=i_{n-1}, ..., X_0=i_{0} | X_n=i_n)
+\end{flalign*}
+
+Which is equivalent to the definition of a Markov chain because it 
+implies
+ 
+$$
+X_k, k \in T_0 \ind X_L , L \in T_1 | X_n
+$$
+
+The random vector obeys the Markov property as shown 
+by the following graph:  
+
+$$
+X_L, L \in T_0 ~~~~~~~~~~~~ X_n ~~~~~~~~~~~~~~~~~~ X_k, k \in T_1
+$$
+
+Again there is no path between $T_0$ and $T_1$ without passing through $X_n$
 
 \end{enumerate}
 
