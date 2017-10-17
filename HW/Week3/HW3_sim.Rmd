@@ -70,5 +70,50 @@ N <- 10
 
 system.time(end_results <- sapply(seq(.1, .9, by=.1), function(p_)
   sapply(run_gamblers_ruin(M, N, i, p_), function(x) x[length(x)] == N)))
+
 summary(end_results)
+
+plot(seq(.1, .9, .1), colMeans(end_results), "l", 
+     xlab = "Probability of Fortune", ylab="h(4,p)",
+     main="Probability of Succesful Gambler")  
+```
+
+```{r}
+M <- 1000
+trans <- matrix(c(.03, .63, .34, .54, .04, .42, 0, 0, 0), 3, 3, byrow=T)
+state <- sapply(1:M, function(x) c(1, 0, 0)) 
+rownames(trans) <- c("{2,1}", "{1,2}", "end")
+colnames(trans) <- c("{2,1}", "{1,2}", "end")
+
+print(trans)
+
+for(i in 1:(M-1)){
+  state_i <- state[,i]
+  state[,i+1] <- c(state_i %*% trans)
+}
+
+death_prob <- 1:M * state[3,]
+print(sum(death_prob))
+```
+
+```{r}
+alpha_ <- .7
+beta_ <- .5
+gamma_ <- .35
+
+trans_shot <- matrix(c((1-alpha_)*(1-beta_)*(1-gamma_), 
+         0, 
+         (1-alpha_) * ((1-beta_)*gamma_ + beta_*(1-gamma_) + beta_*gamma_),
+         alpha_ * (1-beta_)*(1-gamma_),
+         0, 
+         0, 
+         alpha_ * ((1-beta_)*gamma_ + beta_*(1-gamma_) + beta_*gamma_),
+         0,
+         0, 0, (1-beta_)*(1-gamma_), 0, 0, (beta_)*(1-gamma_), (1-beta_)*(gamma_), (beta_)*(gamma_),
+         0, 0, 0, (1-alpha_)*(1-gamma_), (alpha_)*(1-gamma_), 0, (1-alpha_)*(gamma_), (alpha_)*(gamma_)
+         ), 3, 8, T)
+
+rownames(trans_shot) <- c("{A,B,C}", "{B,C}", "{A,C}")
+colnames(trans_shot) <- c("{A,B,C}", "{A,C}", "{B,C}", "{A,C}", "{A}", "{B}", "{C}", "NULL")
+trans_shot
 ```
