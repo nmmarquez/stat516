@@ -1,0 +1,74 @@
+---
+title: "HW3"
+author: "Neal Marquez"
+date: "October 16, 2017"
+output: pdf_document
+---
+
+# Question 1
+
+$$
+\begin{aligned}
+P(X_{n+1} = X_{n} - 1 | X_n) = \frac{X_n(1-p)}{N} \\
+P(X_{n+1} = X_{n} + 1 | X_n) = \frac{p(N-X_n)}{N} \\
+P(X_{n+1} = X_n | X_n) = \frac{N - pN - X_n + 2pX_n}{N}
+\end{aligned}
+$$
+
+$$
+\begin{bmatrix}
+   1-p & p & \dots & \dots & 0 \\
+   \frac{1-p}{N} & \frac{N-pN-1+2p}{N} & \dots & \dots & 0 \\
+   \vdots & \vdots & \ddots & \dots & 0 \\
+   \vdots & \vdots & \vdots & \frac{pN - 2p + 1}{N} & \frac{p}{N} \\
+   0 & 0 & 0 & 1-p & p
+\end{bmatrix} 
+$$
+
+# Question 2a
+
+```{r}
+set.seed(123)
+M <- 20
+N <- 10
+i <- 3
+p <- .29
+
+run_gamblers_ruin <- function(M, N, i, p, quietly=TRUE){
+  i_start <- as.integer(rep(i, M))
+  chain <- lapply(i_start, function(x) x)
+
+  for(j in 1:M){
+    end_pos <- chain[[j]]
+    if(!quietly){
+      cat(paste0("Starting chain number: ", j, "\n"))
+    }
+    while(end_pos != 0 & end_pos != N){
+      if(!quietly){
+        cat(paste0(end_pos, "\n"))
+      }
+      result <- rbinom(1, 1, prob=p)
+      action <- 1^result *  (-1)^(1 - result)
+      chain[[j]] <- c(chain[[j]], end_pos + action)
+      end_pos <- chain[[j]][length(chain[[j]])]
+    }
+  }
+  
+  return(chain)
+}
+
+run_gamblers_ruin(M, N, i, p)
+```
+
+# Question 2b
+
+```{r}
+set.seed(123)
+M <- 1000000
+i <- 4
+N <- 10
+
+system.time(end_results <- sapply(seq(.1, .9, by=.1), function(p_)
+  sapply(run_gamblers_ruin(M, N, i, p_), function(x) x[length(x)] == N)))
+summary(end_results)
+```
