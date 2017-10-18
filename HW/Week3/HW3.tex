@@ -265,4 +265,43 @@ m(a) & = 2.690355
 
 \end{enumerate}
 
+For $A$
+
+\begin{flalign*}
+b_A &= 1 \\
+b_{A,C} &= b_{A,C}(1-\alpha)(1-\gamma) + \alpha(1-\gamma) \\
+b_{A,B,C} &= b_{A,B,C}(1-\alpha)(1-\beta)(1-\gamma) + 
+ b_{A,C} \alpha(1-\beta)(1-\gamma) \\
+b_{A,B,C} &= \frac{\alpha^2(1-\beta)(1-\gamma)^2}
+  {(1-(1-\alpha)(1-\gamma))(1-(1-\alpha)(1-\beta)(1-\gamma))}
+\end{flalign*}
+
+
+for $B$
+
+\begin{flalign*}
+b_B &= 1 \\
+b_{B,C} &= b_{B,C}(1-\beta)(1-\gamma) + \beta(1-\gamma) \\
+b_{A,B,C} &= b_{A,B,C}(1-\alpha)(1-\beta)(1-\gamma) + 
+ b_{B,C} (1-\alpha)(\gamma + \beta - \beta \gamma) \\
+b_{A,B,C} &=\frac{(\beta(1-\gamma)(1-\alpha))(\gamma+\beta-\beta \gamma)}
+  {(1-(1-\beta)(1-\gamma))(1-(1-\alpha)(1-\beta)(1-\gamma))}
+\end{flalign*}
+
+
+for $C$
+
+\begin{flalign*}
+b_{C} &= 1 \\
+b_{B,C} &= b_{B,C}(1-\beta)(1-\gamma) + \gamma(1-\beta) \\
+b_{A,C} &= b_{A,C}(1-\alpha)(1-\gamma) + \gamma(1-\alpha) \\
+b_{A,B,C} &= b_{A,B,C}(1-\alpha)(1-\beta)(1-\gamma) + 
+  b_{A,C} \alpha (1-\beta)(1-\gamma) + \\
+  & ~~~~~ b_{B,C}(1-\alpha)(\gamma + \beta + \beta\gamma) + 
+  \alpha(\gamma + \beta + \beta\gamma) \\
+b_{A,B,C} &=\frac{\frac{\alpha\gamma(1-\alpha)(1-\beta)(1-\gamma)}{1-(1-\alpha)(1-\gamma)}
+  + \frac{\gamma(1-\alpha)(1-\beta)(\gamma+\beta-\beta\gamma)}{1-(1-\beta)(1-\gamma)}
+  + \alpha(\gamma+\beta-\beta\gamma)}{1-(1-\alpha)(1-\beta)(1-\gamma)}
+\end{flalign*}
+
 \end{document}
