@@ -78,6 +78,34 @@ plot(seq(.1, .9, .1), colMeans(end_results), "l",
      main="Probability of Succesful Gambler")  
 ```
 
+# Question 3
+
+If state $a$ is the scenario where the rat is in room 2 and the cat is in room 
+1, state $b$ is the scenario where the rat is in room 1 and the cat is in room 
+2, and state $x$ is the scenario where both animals are in the same room we may
+rewrite the transition matrix as.
+
+$$
+\begin{bmatrix} 
+.03 & .63 & .34 \\ 
+.54 & .04 & .42 \\
+0 & 0 & 0 \\
+\end{bmatrix} 
+$$
+
+It then follows that...
+
+$$
+\begin{aligned}
+m(x) & = 0 \\
+m(a) & = 1 + .03m(a) + .63m(b) \\
+m(b) & = 1 + .54m(a) + .04m(b) \\
+m(b) & = \frac{1 + .54m(a)}{.96} \\
+m(a) & = 1 + .03m(a) + .63 \Big{(} \frac{1 + .54m(a)}{.96} \Big{)} \\
+m(a) & = 2.690355
+\end{aligned}
+$$
+
 ```{r}
 M <- 1000
 trans <- matrix(c(.03, .63, .34, .54, .04, .42, 0, 0, 0), 3, 3, byrow=T)
@@ -92,7 +120,7 @@ for(i in 1:(M-1)){
   state[,i+1] <- c(state_i %*% trans)
 }
 
-death_prob <- 1:M * state[3,]
+death_prob <- 0:(M-1) * state[3,]
 print(sum(death_prob))
 ```
 
