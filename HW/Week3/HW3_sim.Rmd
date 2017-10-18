@@ -64,7 +64,7 @@ run_gamblers_ruin(M, N, i, p)
 
 ```{r}
 set.seed(123)
-M <- 1000000
+M <- 100000
 i <- 4
 N <- 10
 
