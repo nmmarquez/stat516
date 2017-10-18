@@ -55,20 +55,24 @@
   selected urn, and the number of balls in urn $A$ is now $X_{n+1}$.
   Show that $(X_n)_{n\ge 0}$ is a homogeneous Markov chain, and give
   its transition probability matrix.
-~
-We can say that this process is a one step Markov chain because
-$X_n$ is only dependent on $X_{n-1}$ and it can be shown that 
+
+~ \\
+We can say that this process is a one step Markov process because
+$X_n$ is independent of any variable $X_{z}$ where 
+$z \in \{1, 2, \dots, n-2\}$ given $X_{n-1}$ and it can be shown that 
 
 \[
   p(X_n=x|X_{n-1}=y)) \;=\;
   \begin{cases}
     \displaystyle
-    \frac{X_n(1-p)}{N} &\text{if x-1=y} \\
-    \frac{p(N-X_n)}{N} &\text{if x+1=y} \\
-    \frac{N - pN - X_n + 2pX_n}{N} &\text{x=y} \\
+    \frac{x(1-p)}{N} &\text{if x-1=y} \\
+    \frac{p(N-x)}{N} &\text{if x+1=y} \\
+    \frac{N - pN - x + 2px}{N} &\text{x=y} \\
     0 &\text{ otherwise}.
   \end{cases}
 \]
+
+Information about any variable $X_z$ does not change these probabilities.
 
 The transition matrix can then be shown to be  
 
