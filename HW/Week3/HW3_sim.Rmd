@@ -73,9 +73,11 @@ system.time(end_results <- sapply(seq(.1, .9, by=.1), function(p_)
 
 summary(end_results)
 
+png(filename = "./GRuinSim.png")
 plot(seq(.1, .9, .1), colMeans(end_results), "l", 
      xlab = "Probability of Fortune", ylab="h(4,p)",
      main="Probability of Succesful Gambler")  
+dev.off()
 ```
 
 # Question 3

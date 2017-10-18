@@ -1,0 +1,268 @@
+\documentclass{article} % Uses 10pt
+
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{url}
+\usepackage{amsmath,amssymb,kbordermatrix,graphicx}
+\textwidth6.5in
+\textheight=9.7in  % text height can be bigger for a longer letter
+\setlength{\topmargin}{-0.3in} 
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\headsep = 20pt
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+\renewcommand{\baselinestretch}{1.4} 
+
+\setlength{\oddsidemargin}{0in}
+
+\oddsidemargin  0.0in \evensidemargin 0.0in 
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.0pt}
+\lhead{}
+\chead{}
+\rhead{} 
+\lfoot{} 
+\rfoot{} 
+\cfoot{}
+
+\newcommand{\ind}{\mbox{$\perp \kern-5.5pt \perp$}}
+
+\newcommand{\sectionname}[1]{\vspace{0.15cm} \noindent {\bf #1}}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large Stat 516, Homework 3}
+\end{center}
+\sectionname{Due date}:  Thursday, October 19.
+\hfill
+{\bf Note}: Do this homework \emph{individually}.
+
+\begin{enumerate}
+\item (Br\'emaud 2.1.4)
+  Consider $N$ balls numbered from $1$ to $N$ and placed in two urns
+  $A$ and $B$.  Suppose that at stage $n$, urn $A$ contains $X_n$
+  balls.  One then chooses a ball among the $N$ balls at random (we
+  may suppose that the balls are numbered and that a lottery gives the
+  number of the selected ball, which can be in either of the two
+  urns), and then chooses an urn, $A$ with probability $p$, $B$ with
+  probability $q=1-p$.  The selected ball is then placed in the
+  selected urn, and the number of balls in urn $A$ is now $X_{n+1}$.
+  Show that $(X_n)_{n\ge 0}$ is a homogeneous Markov chain, and give
+  its transition probability matrix.
+~
+We can say that this process is a one step Markov chain because
+$X_n$ is only dependent on $X_{n-1}$ and it can be shown that 
+
+\[
+  p(X_n=x|X_{n-1}=y)) \;=\;
+  \begin{cases}
+    \displaystyle
+    \frac{X_n(1-p)}{N} &\text{if x-1=y} \\
+    \frac{p(N-X_n)}{N} &\text{if x+1=y} \\
+    \frac{N - pN - X_n + 2pX_n}{N} &\text{x=y} \\
+    0 &\text{ otherwise}.
+  \end{cases}
+\]
+
+The transition matrix can then be shown to be  
+
+\[
+\kbordermatrix{ & 0 & 1 & \dots & \dots & N\cr
+    0 & 1-p & p & \dots & \dots & 0 \cr
+    1 & \frac{1-p}{N} & \frac{N-pN-1+2p}{N} & \dots & \dots & 0 \cr
+    \vdots &  \vdots & \vdots & \ddots & \dots & 0 \cr
+    \vdots & \vdots & \vdots & \vdots & \frac{pN - 2p + 1}{N} & \frac{p}{N} \cr
+    N & 0 & 0 & 0 & 1-p & p \cr
+}
+\]
+
+\item {\em Simulating gambler's ruin}.\\ Write a routine to simulate
+  realizations of the gambler's ruin chain $\{X_n\}$ with
+  probabilities $p_{i,i+1} = p$, $p_{i,i-1} = q$, $p + q = 1$. The
+  routine should stop simulations as soon as you hit one of the
+  absorbing states. Your input will consist of an initial state $i$,
+  the maximal state $N$ in the state space $\{0,1,\dots,N\}$, and
+  probability of increasing gambler's fortune $p$. The routine should
+  return a vector of Markov chain states until absorption.
+  \begin{enumerate}
+  \item Provide the source code in any computer language of your
+    choice and output of your routine in the form of 20 random realizations of the Markov chain for 
+    input parameters $N = 10$, $i = 3$, and $p = 0.29$.  
+
+~
+
+Code
+
+\begin{verbatim}
+set.seed(123)
+M <- 20
+N <- 10
+i <- 3
+p <- .29
+
+run_gamblers_ruin <- function(M, N, i, p, quietly=TRUE){
+  i_start <- as.integer(rep(i, M))
+  chain <- lapply(i_start, function(x) x)
+
+  for(j in 1:M){
+    end_pos <- chain[[j]]
+    if(!quietly){
+      cat(paste0("Starting chain number: ", j, "\n"))
+    }
+    while(end_pos != 0 & end_pos != N){
+      if(!quietly){
+        cat(paste0(end_pos, "\n"))
+      }
+      result <- rbinom(1, 1, prob=p)
+      action <- 1^result *  (-1)^(1 - result)
+      chain[[j]] <- c(chain[[j]], end_pos + action)
+      end_pos <- chain[[j]][length(chain[[j]])]
+    }
+  }
+  
+  return(chain)
+}
+
+run_gamblers_ruin(M, N, i, p)
+\end{verbatim}
+~
+Output
+\begin{verbatim}
+[[1]]
+ [1] 3 2 3 2 3 4 3 2 3 2 1 2 1 0
+
+[[2]]
+[1] 3 2 1 2 1 0
+
+[[3]]
+ [1] 3 2 3 4 3 2 3 2 1 0
+
+[[4]]
+[1] 3 2 1 0
+
+[[5]]
+ [1] 3 4 5 4 5 4 3 4 3 2 1 0
+
+[[6]]
+[1] 3 2 1 0
+
+[[7]]
+[1] 3 2 1 0
+
+[[8]]
+[1] 3 2 1 2 1 0
+
+[[9]]
+[1] 3 4 3 2 1 0
+
+[[10]]
+[1] 3 4 5 4 3 2 1 0
+
+[[11]]
+ [1] 3 4 3 4 5 6 5 6 5 6 5 4 3 2 1 0
+
+[[12]]
+[1] 3 2 1 0
+
+[[13]]
+ [1] 3 2 3 2 1 2 3 4 3 2 1 0
+
+[[14]]
+[1] 3 2 1 0
+
+[[15]]
+[1] 3 4 3 2 1 0
+
+[[16]]
+ [1] 3 2 1 2 1 2 3 2 1 0
+
+[[17]]
+ [1] 3 4 3 2 3 4 3 2 3 2 1 0
+
+[[18]]
+[1] 3 2 1 0
+
+[[19]]
+[1] 3 2 3 2 1 0
+
+[[20]]
+[1] 3 2 1 2 1 2 1 0
+\end{verbatim}
+
+  \item Use your simulation routine to estimate the probability of reaching the largest 
+    state $N = 10$ starting at state $4$, denoted $h(4,p)$, for
+    probabilities $p_{i,i+1} = p \in\{ 0.1,0.2,\dots,0.9\}$. Turn in a graph with estimated 
+    $h(4,p)$ plotted against $p$.  
+  \end{enumerate}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{GRuinSim.png}
+  \caption{A Gamblers Ruin.}
+  \label{fig:GR}
+\end{figure}
+
+
+\item (Br\'emaud 2.3.1) Rat and Cat move between two rooms, using
+  different paths.  Their motions are independent, governed by their
+  respective transition matrices
+  \[
+  \kbordermatrix{ & 1 & 2\cr
+    1 & 0.1 & 0.9 \cr
+    2 & 0.9 & 0.1\cr
+  },
+  \quad
+  \kbordermatrix{ & 1 & 2\cr
+    1 & 0.3 & 0.7 \cr
+    2 & 0.6 & 0.4\cr
+  }.
+  \]
+  Cat starts from room 1, Rat from room 2.  If they are ever in the
+  same room, Cat eats Rat.  How long will Rat survive on the average?
+
+If state $a$ is the scenario where the rat is in room 2 and the cat is in room 
+1, state $b$ is the scenario where the rat is in room 1 and the cat is in room 
+2, and state $x$ is the scenario where both animals are in the same room we may
+rewrite the transition matrix as.   
+
+\[
+\kbordermatrix{& a & b & x\cr
+    a & .03 & .63 & .34 \cr
+    b & .54 & .04 & .42 \cr
+    x & 0 & 0 & 0 \cr
+}
+\]
+
+then \\
+
+\begin{flalign*}
+m(x) & = 0 \\
+m(a) & = 1 + .03m(a) + .63m(b) \\
+m(b) & = 1 + .54m(a) + .04m(b) \\
+m(b) & = \frac{1 + .54m(a)}{.96} \\
+m(a) & = 1 + .03m(a) + .63 \Big{(} \frac{1 + .54m(a)}{.96} \Big{)} \\
+m(a) & = 2.690355
+\end{flalign*}
+
+
+\item (Br\'emaud 2.3.3) Three characters, $A$, $B$, and $C$, armed
+  with guns, suddenly meet at the corner of a Washington, D.C.~street,
+  whereupon they naturally start shooting at one another. Each
+  street-gang kid shoots every tenth second, as long as he is still
+  alive. The probability of a hit for $A$, $B$, and $C$ are $\alpha$,
+  $\beta$, and $\gamma$, respectively.  $A$ is the most hated, and
+  therefore, as long as he is alive, $B$ and $C$ ignore each other and
+  shoot at $A$. For historical reasons not developed here, $A$ cannot
+  stand $B$, and therefore he shoots only at $B$ while the latter is
+  still alive.  Lucky $C$ is shot at if and only if he is in the
+  presence of $A$ alone or $B$ alone.  What are the survival
+  probabilities of $A$, $B$, and $C$, respectively?
+
+\end{enumerate}
+
+\end{document}
