@@ -145,3 +145,48 @@ rownames(trans_shot) <- c("{A,B,C}", "{B,C}", "{A,C}")
 colnames(trans_shot) <- c("{A,B,C}", "{A,C}", "{B,C}", "{A,C}", "{A}", "{B}", "{C}", "NULL")
 trans_shot
 ```
+
+All non listed values are treated as 0.  
+
+For $A$
+
+$$
+\begin{aligned}
+b_A &= 1 \\
+b_{A,C} &= b_{A,C}(1-\alpha)(1-\gamma) + \alpha(1-\gamma) \\
+b_{A,B,C} &= b_{A,B,C}(1-\alpha)(1-\beta)(1-\gamma) + 
+ b_{A,C} \alpha(1-\beta)(1-\gamma) \\
+b_{A,B,C} &= \frac{\alpha^2(1-\beta)(1-\gamma)^2}
+  {(1-(1-\alpha)(1-\gamma))(1-(1-\alpha)(1-\beta)(1-\gamma))}
+\end{aligned}
+$$
+
+for $B$
+
+$$
+\begin{aligned}
+b_B &= 1 \\
+b_{B,C} &= b_{B,C}(1-\beta)(1-\gamma) + \beta(1-\gamma) \\
+b_{A,B,C} &= b_{A,B,C}(1-\alpha)(1-\beta)(1-\gamma) + 
+ b_{B,C} (1-\alpha)(\gamma + \beta - \beta \gamma) \\
+b_{A,B,C} &=\frac{(\beta(1-\gamma)(1-\alpha))(\gamma+\beta-\beta \gamma)}
+  {(1-(1-\beta)(1-\gamma))(1-(1-\alpha)(1-\beta)(1-\gamma))}
+\end{aligned}
+$$
+
+for $C$
+
+$$
+\begin{aligned}
+b_{C} &= 1 \\
+b_{B,C} &= b_{B,C}(1-\beta)(1-\gamma) + \gamma(1-\beta) \\
+b_{A,C} &= b_{A,C}(1-\alpha)(1-\gamma) + \gamma(1-\alpha) \\
+b_{A,B,C} &= b_{A,B,C}(1-\alpha)(1-\beta)(1-\gamma) + 
+  b_{A,C} \alpha (1-\beta)(1-\gamma) + \\
+  & ~~~~~ b_{B,C}(1-\alpha)(\gamma + \beta + \beta\gamma) + 
+  \alpha(\gamma + \beta + \beta\gamma) \\
+b_{A,B,C} &=\frac{\frac{\alpha\gamma(1-\alpha)(1-\beta)(1-\gamma)}{1-(1-\alpha)(1-\gamma)}
+  + \frac{\gamma(1-\alpha)(1-\beta)(\gamma+\beta-\beta\gamma)}{1-(1-\beta)(1-\gamma)}
+  + \alpha(\gamma+\beta-\beta\gamma)}{1-(1-\alpha)(1-\beta)(1-\gamma)}
+\end{aligned}
+$$
