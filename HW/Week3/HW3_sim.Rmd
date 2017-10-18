@@ -136,14 +136,23 @@ trans_shot <- matrix(c((1-alpha_)*(1-beta_)*(1-gamma_),
          0, 
          0, 
          alpha_ * ((1-beta_)*gamma_ + beta_*(1-gamma_) + beta_*gamma_),
-         0,
-         0, 0, (1-beta_)*(1-gamma_), 0, 0, (beta_)*(1-gamma_), (1-beta_)*(gamma_), (beta_)*(gamma_),
-         0, 0, 0, (1-alpha_)*(1-gamma_), (alpha_)*(1-gamma_), 0, (1-alpha_)*(gamma_), (alpha_)*(gamma_)
-         ), 3, 8, T)
+         rep(0, 7),
+         0, 0, (1-beta_)*(1-gamma_), 0, 0, (beta_)*(1-gamma_), (1-beta_)*(gamma_),
+         0, 0, 0, (1-alpha_)*(1-gamma_), (alpha_)*(1-gamma_), 0, (1-alpha_)*(gamma_),
+         0, 0, 0, 0, 1, 0, 0,
+         0, 0, 0, 0, 0, 1, 0,
+         0, 0, 0, 0, 0, 0, 1
+         ), 7, 7, T)
 
-rownames(trans_shot) <- c("{A,B,C}", "{B,C}", "{A,C}")
-colnames(trans_shot) <- c("{A,B,C}", "{A,C}", "{B,C}", "{A,C}", "{A}", "{B}", "{C}", "NULL")
-trans_shot
+rownames(trans_shot) <- c("{A,B,C}", "{A,B}", "{B,C}", "{A,C}", "{A}", "{B}", "{C}")
+colnames(trans_shot) <- c("{A,B,C}", "{A,B}", "{B,C}", "{A,C}", "{A}", "{B}", "{C}")
+est_probs <- (c(1, 0, 0, 0, 0, 0, 0) %*% (trans_shot %^% 100))[1,]
+alpha_calc <- (alpha_**2 * (1-beta_) * (1-gamma_)**2) / 
+  ((1 - (1-alpha_)*(1-gamma_))*(1-(1-alpha_)*(1-beta_)*(1-gamma_)))
+all.equal(c(`{A}`=alpha_calc), c(est_probs["{A}"]))
+beta_calc <- ((beta_*(1-gamma_)*(1-alpha_))*(gamma_+beta_-beta_*gamma_)) / 
+  ((1-(1-gamma_)*(1-beta_))*(1-(1-gamma_)*(1-beta_)*(1-alpha_)))
+all.equal(c(`{B}`=beta_calc), c(est_probs["{B}"]))
 ```
 
 All non listed values are treated as 0.  
