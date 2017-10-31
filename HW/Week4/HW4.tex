@@ -106,7 +106,7 @@ then for the 2D random walk
   & = 4^{-2n} {2n \choose n} \sum_{m=0}^{n} {n \choose m} {n \choose n-m} \\
   & = \Big( 2^{-2n} {2n \choose n} \Big)^2 \\
   & = \big( \rho_1^{(n)} \big)^2 \\
-  & = \frac{1}{\pi n}
+  & \sim \frac{1}{\pi n}
 \end{flalign*}
 
 which means the series converges as $\rho_{2}^{(n)}$ is less than 1 as n
@@ -127,6 +127,35 @@ first by solving the linear equation system from the definition of a
 stationary distribution.  Then derive the stationary distribution again
 using the ``regenerative form of invariant measures.''
 
+By linear equations...
+
+\begin{flalign*}
+  \pi_1 & = \frac{\gamma \pi_3}{\alpha} \\
+  \pi_2 & = \frac{\alpha \pi_1}{\beta} \\
+  \pi_3 & = \frac{\beta \pi_2}{\alpha} \\
+  1 & = \pi_1 + \pi_2 + \pi_3 \\
+  1 & = \frac{\gamma \pi_3}{\alpha} + \frac{\gamma \pi_3}{\beta} + \pi_3 \\
+  1 & = \pi_3 (\frac{\gamma}{\alpha} + \frac{\gamma}{\beta} + 1) \\
+  \pi_3 & = (\frac{\gamma}{\alpha} + \frac{\gamma}{\beta} + 1)^{-1} \\
+  \pi_1 & = (\frac{\alpha}{\gamma} + \frac{\alpha}{\beta} + 1)^{-1} \\
+  \pi_2 & = (\frac{\beta}{\alpha} + \frac{\beta}{\gamma} + 1)^{-1} \\
+\end{flalign*}
+
+By regenerative form of interval measures...
+
+\begin{flalign*}
+  E[X] & = P(X \geq 1) + P(X \geq 2) + P(X \geq 3) + ... \\
+  E_1[X_1] & = 1 + 0 + 0 + ... \\
+  E_1[X_1] & = 1 \\
+  E_1[X_2] & = \alpha + \alpha (1 - \beta) + \alpha (1 - \beta)^2 + ... \\
+  E_1[X_2] & = \frac{\alpha}{\beta} \\
+  E_1[X_3] & = \alpha + \alpha (1 - \gamma) + \alpha (1 - \gamma)^2 + ... \\
+  E_1[X_3] & = \frac{\alpha}{\gamma} \\
+  \pi_1 & = E_1[X_1] * \pi_1 = (\frac{\alpha}{\gamma} + \frac{\alpha}{\beta} + 1)^{-1} \\
+  \pi_2 & = E_1[X_2] * \pi_1 = (\frac{\beta}{\alpha} + \frac{\beta}{\gamma} + 1)^{-1} \\
+  \pi_3 & = E_1[X_3] * \pi_1 = (\frac{\gamma}{\alpha} + \frac{\gamma}{\beta} + 1)^{-1} \\
+\end{flalign*}
+
 \item (Guttorp 2.2.14) Consider a Markov chain on a finite state space
   $S$, with a t.p.m.\ that has entries $p_{ij}>0$ for all $i,j\in S$.
   Let $\pi$ be the stationary distribution.  Show that the $n$-step
@@ -141,7 +170,9 @@ using the ``regenerative form of invariant measures.''
   Now bound $\max_i p^{(n+1)}_{ij} -\min_i p^{(n+1)}_{ij}$ using the
   Chapman-Kolmogorov equations (i.e., one-step analysis).
 
-
+\begin{flalign*}
+  \pi_j = \sum_{k \in S} \pi_k p_{kj} \\
+\end{flalign*}
 
 \end{enumerate}
 
