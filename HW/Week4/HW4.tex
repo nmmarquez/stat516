@@ -1,0 +1,148 @@
+\documentclass{article} % Uses 10pt
+
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{url}
+\usepackage{amsmath,amssymb,kbordermatrix,graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning, %
+                petri,%
+                topaths,%
+                shapes,%
+                snakes,%
+                automata,%
+                backgrounds}%
+\textwidth6.5in
+\textheight=9.7in  % text height can be bigger for a longer letter
+\setlength{\topmargin}{-0.3in}
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\headsep = 20pt
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+
+
+\renewcommand{\baselinestretch}{1.4}
+
+\setlength{\oddsidemargin}{0in}
+
+\oddsidemargin  0.0in \evensidemargin 0.0in
+
+%%\parindent0em
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.0pt}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{}
+\rfoot{}
+\cfoot{}
+
+\newcommand{\ind}{\mbox{$\perp \kern-5.5pt \perp$}}
+
+\newcommand{\sectionname}[1]{\vspace{0.5cm} \noindent {\bf #1}}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large Stat 516, Homework 4}
+\end{center}
+\sectionname{Due date}:  Tuesday, October 31.
+\hfill {\bf Note}: Do \emph{individual} work.
+
+\begin{enumerate}
+
+\item
+  \begin{enumerate}
+  \item Prove that recurrence is a communication
+    class property: $i \leftrightarrow j$ and $i$ is recurrent
+    $\Rightarrow$ $j$ is recurrent.
+
+\begin{flalign*}
+  P_i(X_k=j) & > 0 \\
+  P_j(X_m=i) & > 0 \\
+  P_{ij}^{(k)} > 0, & ~ P_{ii}^{(n)} > 0, ~ P_{ji}^{(m)} > 0 \\
+  \sum_{n=1}^{\infty} P_{ii}^{(n)} & = \infty = \sum_{n=1}^{\infty} P_i(X_n=i) \\
+  P_{jj}^{(k+m+n)} & = P_{ij}^{(k)} P_{ii}^{(n)} P_{ji}^{(m)} \\
+  & = P_{ij}^{(k)} P_{ji}^{(m)} \sum_{n=1}^{\infty} P_{ii}^{(n)} = \infty
+\end{flalign*}
+
+  \item Is the Markov chain with the transition graph below
+    irreducible?  Explain. Find its period and its cyclic classes.
+    (Note: the graph has no self-loops, so the transitions from a
+    state $i$ to itself have probability zero.)
+
+The markov chain is irreducible because each state can be reached by every other
+state given enough time. The cyclic classes of the markov chain are
+$\{3,5,6\} ~ \{1,2\} ~ \{4,7\}$ which makes $d$ and the periodicity of the
+graph $3$.
+
+  \end{enumerate}
+
+
+
+
+\item Consider a fair simple random walk on $\mathbb{Z}^2$, that is,
+  each state $(i,j)$ has four neighbors (in-/decrease $i$ or $j$ by 1)
+  and the four transitions to these neighbors are equally probable.
+  Show that the state (0,0) is recurrent.  Is it positive recurrent?
+
+Let $\rho_{k}^{(n)}$ be the probability of returning to the k-dimensional
+origin after n steps.
+
+Given the 1D random walk
+
+$$
+\rho_{1}^{(n)} = {2n \choose n} 2^{-2n} \sim \frac{1}{\sqrt{\pi n}}
+$$
+
+then for the 2D random walk
+
+\begin{flalign*}
+  \rho_{2}^{(n)} & = 4^{-2n} \sum_{m=0}^{n} \frac{2n!}{m!m!(n-m)!(n-m)!} \\
+  & = 4^{-2n} {2n \choose n} \sum_{m=0}^{n} {n \choose m} {n \choose n-m} \\
+  & = \Big( 2^{-2n} {2n \choose n} \Big)^2 \\
+  & = \big( \rho_1^{(n)} \big)^2 \\
+  & = \frac{1}{\pi n}
+\end{flalign*}
+
+which means the series converges as $\rho_{2}^{(n)}$ is less than 1 as n
+increases.
+
+\item %(Br\'emaud 3.2.4)
+  For $\alpha,\beta,\gamma\in(0,1)$, consider the transition probability matrix
+\[
+\mathbf{P}=\begin{pmatrix}
+1-\alpha & \alpha & 0\\
+0 & 1-\beta & \beta\\
+\gamma & 0 & 1-\gamma
+\end{pmatrix},
+\]
+   Show that the associated Markov
+chain is irreducible and compute its stationary distribution.  Do it
+first by solving the linear equation system from the definition of a
+stationary distribution.  Then derive the stationary distribution again
+using the ``regenerative form of invariant measures.''
+
+\item (Guttorp 2.2.14) Consider a Markov chain on a finite state space
+  $S$, with a t.p.m.\ that has entries $p_{ij}>0$ for all $i,j\in S$.
+  Let $\pi$ be the stationary distribution.  Show that the $n$-step
+  transition probabilities $p^{(n)}_{ij}$ satisfy
+  \[
+  \left| p^{(n)}_{ij} - \pi_j \right| \;\le\; (1-d\delta)^n,
+  \]
+  where $d=|S|$ and $\delta=\min p_{ij}$.\\[0.05cm]
+  {\em Hint:} Divide the terms in the equation $\sum_j
+  (p_{ij}-p_{kj})=0$ into those with positive and those with negative
+  values.  The sum of the positive terms is bounded by $1-d\delta$.
+  Now bound $\max_i p^{(n+1)}_{ij} -\min_i p^{(n+1)}_{ij}$ using the
+  Chapman-Kolmogorov equations (i.e., one-step analysis).
+
+
+
+\end{enumerate}
+
+\end{document}
