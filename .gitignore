@@ -10,4 +10,7 @@
 *.fdb_latexmk
 *.pdf
 *.png
+*.djvu
+*.txt
+*.csv
 

@@ -1,0 +1,126 @@
+\documentclass{article} % Uses 10pt
+
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{url}
+\usepackage{amsmath,amssymb,kbordermatrix,graphicx}
+\textwidth6.5in
+\textheight=9.7in  
+\setlength{\topmargin}{-0.3in} 
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\headsep = 20pt
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\E}{\mathbb{E}}
+
+
+\renewcommand{\baselinestretch}{1.4} 
+
+\setlength{\oddsidemargin}{0in}
+
+\oddsidemargin  0.0in \evensidemargin 0.0in 
+
+%%\parindent0em
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.0pt}
+\lhead{}
+\chead{}
+\rhead{} 
+\lfoot{} 
+\rfoot{} 
+\cfoot{}
+
+\newcommand{\ind}{\mbox{$\perp \kern-5.5pt \perp$}}
+
+\newcommand{\sectionname}[1]{\vspace{0.5cm} \noindent {\bf #1}}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large Stat 516, Homework 5}
+\end{center}
+\sectionname{Due date}:  Thursday, November 16.
+
+\noindent
+\noindent
+{\bf Note}: Do this homework in \emph{pairs}; two students turning in
+a single joint solution.  No two Statistics, Biostatistics, QERM, EE,
+Econ, AMath, \dots students may work together.  (Exceptions as needed based on the make-up of the class.)
+
+\begin{enumerate}
+\item Consider the model $Y | \theta \sim \mbox{Poisson}(E \times \theta)$ where $E$ is a known ``expected number'' of cases, $Y$ is the count of disease cases and $\theta >0$ is the relative risk with $\theta=1$ corresponding to ``null'' risk.
+\begin{enumerate}
+\item Find expressions for the likelihood function $L(\theta)$, the log
+  likelihood function $l(\theta)$, the score function $S(\theta)$ and
+  Fisher's (expected) information $I(\theta)$.  Find the MLE and its variance.
+\item Suppose we assume a prior of $\theta \sim \mbox{Gamma}(a,b)$ so that
+$$p(\theta) = \frac{b^a}{\Gamma(a)}\theta^{a-1} \exp( - b \theta),$$
+with $a,b>0$. Show that the posterior $\theta | y$ is also gamma and
+find its parameters.
+\item Close to a nuclear reprocessing plant 
+  $y=4$ cases of
+  leukemia were observed with an expected number of $E=0.25$.
+  Give the MLE, its variance and a 95\%
+  confidence interval based on a normal approximation.  
+\item Find the $a$ and $b$ which give a gamma prior that assigns 0.9
+  probability to the interval [0.1,10].
+Find the posterior corresponding to this prior and generate samples from the posterior. Give a histogram of the posterior and state a 95\% credible interval.
+\item Is there evidence of excess risk for these data? Discuss the differences between the likelihood-based and Bayesian analyses.
+\end{enumerate}
+\item Consider the Snoqualmie falls data available on the class
+  website. 
+  We will analyze the
+  data for June across the 36 years; compare how the data was
+  processed in examples in the lecture notes.
+\begin{enumerate}
+\item Using the multiple years of data estimate the transition
+  probability matrix for the first-order Markov chain model, with
+  $p_{12}$
+  the probability of wet given dry and $p_{21}$
+  the probability of dry given wet.  Obtain MLEs and 95\% asymptotic
+  confidence intervals for $p_{12}$ and $p_{21}$.
+\item Under the assumption of independent uniform priors, give the
+  form of the posterior distributions for the parameters
+  $p_{12},p_{21}$. Obtain the posterior and report posterior medians
+  and 95\% credible intervals for each of the two parameters.
+\item Test the null of independence versus the Markov model, using a likelihood ratio test and a Bayes factor.
+\item Now consider the null of common transition probabilities across
+  years versus the alternative that each year possesses its own pair
+  of probabilities. First, estimate the probabilities in each year and
+  provide a figure of the logits of the probabilities,
+  i.e.~$\log\left(\frac{p_{12}}{1-p_{12}}\right)$
+  and $\log\left(\frac{p_{21}}{1-p_{21}}\right)$,
+  plotted versus year. Second, carry out a likelihood ratio test to
+  formally test the hypothesis. Third, evaluate the Bayes factor to
+  examine the evidence for each of the two hypotheses. What do you
+  conclude?
+\end{enumerate}
+\item For ternary observations (i.e., $s=3$ states), consider a Markov
+  chain model in which the $3\times 3$ transition probability matrix
+  $\mathbf{P}=(p_{ij})$ is unrestricted.  With the row sums being one,
+  we may think of there being 6 parameters, say $p_{ij}$ with $1\le
+  i\le 3$ and $1\le j\le 2$.
+  \begin{enumerate}
+  \item Specialize the result on likelihood inference for parametric
+    transition probabilities to this case and write out the $6\times
+    6$ joint asymptotic covariance matrix for the MLE
+    \[
+    \left(\hat p_{11},\hat p_{12},\, \hat p_{21},\hat
+      p_{22}, \,\hat p_{31},\hat p_{32}\right),
+    \]
+    giving formulas in terms of $\mathbf{P}$ and the stationary
+    distribution $\pi$ (which is assumed to exist).
+  \item Write out the $9\times 9$ joint asymptotic covariance matrix
+    for the MLE
+    \[
+    \left(\hat p_{11},\hat p_{12},\hat p_{13},\, \hat p_{21},\hat
+      p_{22},\hat p_{23},\, \hat p_{31},\hat p_{32},\hat p_{33}\right).
+    \]
+  \item Discuss the asymptotic dependences you find.
+  \end{enumerate}
+\end{enumerate}
+
+\end{document}
