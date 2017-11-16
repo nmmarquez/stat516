@@ -470,6 +470,26 @@ Our LRT returns a p-value of $\approx 0.028$, reasonable evidence against the si
     giving formulas in terms of $\mathbf{P}$ and the stationary
     distribution $\pi$ (which is assumed to exist).
 
+The log likelihood for the above function may be written as
+
+\begin{flalign*}
+  \ell(\mathbf{p}) = & N_{11} \text{log}(p_{11}) + N_{12} \text{log}(p_{12}) +
+  N_{13} \text{log}(1 - p_{11} p_{12}) + \\
+  & N_{21} \text{log}(p_{21}) + N_{22} \text{log}(p_{22}) +
+  N_{23} \text{log}(1 - p_{21} p_{22}) + \\
+  & N_{31} \text{log}(p_{31}) + N_{32} \text{log}(p_{32}) +
+  N_{33} \text{log}(1 - p_{31} p_{32})
+\end{flalign*}
+
+Where...
+
+\begin{flalign*}
+  E[N_{ij}] = n \pi_i p_{ij}
+\end{flalign*}
+
+Which when taking second ordervpartial derivatives yields the follwing
+asymptotic covariance matrix $\Sigma$.
+
 \[
 \Sigma =
 \begin{bmatrix}
@@ -477,8 +497,8 @@ Our LRT returns a p-value of $\approx 0.028$, reasonable evidence against the si
    \frac{-p_{11} p_{12}}{n \pi_1} & \frac{p_{12}(1-p_{12})}{n \pi_1} & 0 & 0 & 0 & 0 \\
    0 & 0 & \frac{p_{21}(1-p_{21})}{n \pi_2} & \frac{-p_{21} p_{22}}{n \pi_2} & 0 & 0 \\
    0 & 0 & \frac{-p_{21} p_{22}}{n \pi_2} & \frac{p_{22}(1-p_{22})}{n \pi_2} & 0 & 0 \\
-   0 & 0 & 0 & 0 & \frac{p_{31}(1-p_{31})}{n - (1 -\pi_1 - \pi_2)} & \frac{-p_{31} p_{32}}{n - (1 -\pi_1 - \pi_2)} \\
-   0 & 0 & 0 & 0 & \frac{-p_{31} p_{32}}{n - (1 -\pi_1 - \pi_2)} & \frac{p_{32}(1-p_{32})}{n - (1 -\pi_1 - \pi_2)} \\
+   0 & 0 & 0 & 0 & \frac{p_{31}(1-p_{31})}{n (1 -\pi_1 - \pi_2)} & \frac{-p_{31} p_{32}}{n (1 -\pi_1 - \pi_2)} \\
+   0 & 0 & 0 & 0 & \frac{-p_{31} p_{32}}{n (1 -\pi_1 - \pi_2)} & \frac{p_{32}(1-p_{32})}{n (1 -\pi_1 - \pi_2)} \\
 \end{bmatrix}
 \]
 
@@ -487,7 +507,7 @@ or
 for $1 \leq i \leq 3$ and $1 \leq j \leq 2$ and $1 \leq k \leq 3$ and $1 \leq l \leq 2$
 
 \begin{displaymath}
-  \Sigma_{p_{ij},p_{kl}} = \left\{
+  \Sigma_{\hat p_{ij}, \hat p_{kl}} = \left\{
     \begin{array}{lr}
       0 & \text{if} ~ i \neq k \\
       \frac{p_{ij}(1-p_{ij})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j = l \\
@@ -506,14 +526,14 @@ for $1 \leq i \leq 3$ and $1 \leq j \leq 2$ and $1 \leq k \leq 3$ and $1 \leq l 
 for $i, j, k, l \in \{ 1, 2, 3 \}$
 
 \begin{displaymath}
-  \Sigma_{p_{ij},p_{kl}} = \left\{
+  \Sigma_{ \hat p_{ij}, \hat p_{kl}} = \left\{
     \begin{array}{lr}
       0 & \text{if} ~ i \neq k \\
       \frac{p_{ij}(1-p_{ij})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j = l \neq 3 \\
       \frac{-p_{ij}p_{il}}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j \neq l ~ \& ~ j \neq 3 ~ \& ~ l \neq 3 \\
-      \frac{p_{i1}(1 - p_{i1}) + p_{i2}(1 - p_{i2}) - 2p_{i1}p_{i2}}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j = l = 3 \\
-      \frac{p_{ij}(1 - p_{i1} - p_{i2})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j \neq l = 3 \\
-      \frac{p_{il}(1 - p_{i1} - p_{i2})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ l \neq j = 3 \\
+      \frac{(1-p_{i1}-p_{i2})(p_{i1}+p_{i2})} {n \pi_i} & \text{if} ~ i = k ~ \&  ~ j = l = 3 \\
+      \frac{-p_{ij}(1-p_{i1}-p_{i2})} {n \pi_i} & \text{if} ~ i = k ~ \&  ~ j \neq l = 3 \\
+      \frac{-(1-p_{i1}-p_{i2})p_{il}} {n \pi_i} & \text{if} ~ i = k ~ \&  ~ l \neq j = 3 \\
     \end{array}
   \right.
 \end{displaymath}
@@ -526,9 +546,9 @@ Each state $i$ can be used as a starting point and all points in the
 asymptotic covariance matrix for the MLE may be seen as a trinomial likelihood
 where the elements of the covariance matrix $\Sigma$ may be populated by the
 inverse of the fisher information matrix $I(\theta)$. For each starting point
-the sub matrix has asymptotic dependencies such that any $p_{i1}$ and $p_{i2}$
-are negatively correlated which, because of their sum to one constraint, makes
-sense with our intuition for the model.
+the sub matrix has asymptotic dependencies such that any two values $p_{i1}$,
+$p_{i2}$, and $p_{i3}$ are negatively correlated which, because of their sum to
+one constraint, makes sense with our intuition for the model.
   \end{enumerate}
 \end{enumerate}
 
