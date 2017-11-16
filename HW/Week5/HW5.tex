@@ -3,10 +3,10 @@
 \usepackage{fancyhdr}
 \usepackage{helvet}
 \usepackage{url}
-\usepackage{amsmath,amssymb,kbordermatrix,graphicx}
+\usepackage{amsmath,amssymb,kbordermatrix,graphicx, color, listings}
 \textwidth6.5in
-\textheight=9.7in  
-\setlength{\topmargin}{-0.3in} 
+\textheight=9.7in
+\setlength{\topmargin}{-0.3in}
 \addtolength{\topmargin}{-\headheight}
 \addtolength{\topmargin}{-\headsep}
 \headsep = 20pt
@@ -15,12 +15,32 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator{\E}{\mathbb{E}}
 
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
 
-\renewcommand{\baselinestretch}{1.4} 
+\lstset{frame=tb,
+  language=R,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\renewcommand{\baselinestretch}{1.4}
 
 \setlength{\oddsidemargin}{0in}
 
-\oddsidemargin  0.0in \evensidemargin 0.0in 
+\oddsidemargin  0.0in \evensidemargin 0.0in
 
 %%\parindent0em
 
@@ -28,9 +48,9 @@
 \renewcommand{\headrulewidth}{0.0pt}
 \lhead{}
 \chead{}
-\rhead{} 
-\lfoot{} 
-\rfoot{} 
+\rhead{}
+\lfoot{}
+\rfoot{}
 \cfoot{}
 
 \newcommand{\ind}{\mbox{$\perp \kern-5.5pt \perp$}}
@@ -42,7 +62,8 @@
 \begin{center}
   \textbf{\large Stat 516, Homework 5}
 \end{center}
-\sectionname{Due date}:  Thursday, November 16.
+\sectionname{Due date}:  Thursday, November 16. \\
+\sectionname{Names}: Andy Magee & Neal Marquez.
 
 \noindent
 \noindent
@@ -56,22 +77,95 @@ Econ, AMath, \dots students may work together.  (Exceptions as needed based on t
 \item Find expressions for the likelihood function $L(\theta)$, the log
   likelihood function $l(\theta)$, the score function $S(\theta)$ and
   Fisher's (expected) information $I(\theta)$.  Find the MLE and its variance.
+
+\begin{flalign*}
+  \mathcal{L}(Y | \theta, E) & = \frac{(E \theta)^Y e^{-E \theta}}{Y!} \\
+  \mathcal{L}(Y | \theta, E) & = \prod_{i=1}^{n}
+    \frac{(E \theta)^{y_i}e^{- E \theta }}{y_{i}!} \\
+  \mathcal{L}(Y | \theta, E) & =
+    \frac{(E \theta)^{\sum_{i=1}^{n} y_i}e^{-n E \theta }}{\prod_{i=1}^{n} y_{i}!} \\
+  \ell(Y | \theta, E) & = \sum_{i=1}^{n} y_i log(E \theta) - n E \theta + c \\
+  S(\theta) & = \frac{d \ell}{d \theta} =
+    -n + \frac{1}{E \theta} \sum_{i=1}^{n} y_i \\
+  I(\theta) & = - \mathbf{E} \Big{[} \frac{d^2 \ell}{d \theta^2} \Big{]} =
+    \frac{1}{E \theta^2} \sum_{i=1}^{n} y_i = \frac{n}{\theta} \\
+  MLE(\theta) & = \hat{\theta} = \frac{1}{nE} \sum_{i=1}^{n} y_i \\
+  Var(\hat{\theta}) & = \matchcal{I}^{-1} (\theta) = \frac{\theta}{n} \\
+\end{flalign*}
+
 \item Suppose we assume a prior of $\theta \sim \mbox{Gamma}(a,b)$ so that
 $$p(\theta) = \frac{b^a}{\Gamma(a)}\theta^{a-1} \exp( - b \theta),$$
 with $a,b>0$. Show that the posterior $\theta | y$ is also gamma and
 find its parameters.
-\item Close to a nuclear reprocessing plant 
+
+\begin{flalign*}
+  \text{Posterior} & \propto \text{Likelihood} \times \text{Prior} \\
+  & = \frac{b^a \theta^{a-1}e^{-b \theta}}{\Gamma(a)}
+  \frac{(E \theta)^Y e^{-E \theta}}{Y!} \\
+  & = \frac{b^a}{\Gamma(a)} \frac{E^Y}{Y!}  \theta^{a-1}e^{-b \theta}
+  \theta^Y e^{-E \theta} \\
+  & \propto \theta^{a-1} e^{-b \theta} \theta^Y e^{-E \theta} \\
+  & = \theta^{Y + a - 1} e^{-\theta (b + E)} \\
+  & \propto \frac{(b + E)^{Y+a}\theta^{Y + a - 1} e^{-\theta (b + E)}}{\Gamma(Y+a)} \\
+  & \sim \text{Gamma}(Y+a, b+E)
+\end{flalign*}
+
+\item Close to a nuclear reprocessing plant
   $y=4$ cases of
   leukemia were observed with an expected number of $E=0.25$.
   Give the MLE, its variance and a 95\%
-  confidence interval based on a normal approximation.  
+  confidence interval based on a normal approximation.
+
+\begin{flalign*}
+\hat{\theta} & = \frac{4}{.25} = 16 \\
+Var(\hat{\theta}) & = \frac{16}{1} = 16 \\
+CI_{.95} & = \Bigg{(} \hat{\theta} - 1.96 * \sqrt{Var(\hat{\theta})},
+              \hat{\theta} + 1.96 * \sqrt{Var(\hat{\theta})} \Bigg{)} \\
+& = (8.16, 23.84)
+\end{flalign*}
+
 \item Find the $a$ and $b$ which give a gamma prior that assigns 0.9
   probability to the interval [0.1,10].
-Find the posterior corresponding to this prior and generate samples from the posterior. Give a histogram of the posterior and state a 95\% credible interval.
+Find the posterior corresponding to this prior and generate samples from the
+posterior. Give a histogram of the posterior and state a 95\% credible interval.
+
+~ \\
+If we fix $a$ to 1 then we find a value $b$ for the Gamma distribution
+which satisfies the above criteria.
+
+\begin{flalign*}
+  \text{Gamma}(1,b) & \sim \frac{b^a \theta^{a-1}e^{-b \theta}}{\Gamma(a)} \\
+  & = b e^{-b \theta} \\
+  .9 & = \int_{.1}^{10} -e^{\theta b} \\
+  .9 & = -e^{-10 b} + e^{-.1 b} \\
+  b & \approx 1.05 \\
+  \therefore \text{Posterior} & \propto \text{Gamma}(4+1, 1.05 + .25) \\
+  CI_{.95} & = (1.25, 7.86)
+\end{flalign*}
+
+
+\begin{figure}[h!t]
+\centerline{
+	\includegraphics[width=8.1cm]{./post.png}
+}
+\end{figure}
+
+~ \\
+~ \\
+~ \\
+
 \item Is there evidence of excess risk for these data? Discuss the differences between the likelihood-based and Bayesian analyses.
+
+~ \\
+Based on the standard criteria for assesing evidence of risk both the MLE and
+the Bayesian approach provide $95\%$ intervals, confidence and credible respectively,
+of the parameter estimate $\hat{\theta}$ which do not cover the null risk value
+of $1$. Because of this our data shows evidence for higher risk than
+expected at a strong statistical level.
+
 \end{enumerate}
 \item Consider the Snoqualmie falls data available on the class
-  website. 
+  website.
   We will analyze the
   data for June across the 36 years; compare how the data was
   processed in examples in the lecture notes.
@@ -82,6 +176,53 @@ Find the posterior corresponding to this prior and generate samples from the pos
   the probability of wet given dry and $p_{21}$
   the probability of dry given wet.  Obtain MLEs and 95\% asymptotic
   confidence intervals for $p_{12}$ and $p_{21}$.
+
+~ \\
+
+\begin{lstlisting}
+  y <- scan("snoqualmie.txt")
+  nodays <- rep(c(365,365,365,366),9) # account for leap years
+  june <- matrix(0, nrow=36, ncol=30) # build empty data mtarix
+  daysum <- 31*3 + 30 + 29 # our start point is this number of days in the future
+  for (i in 1:36){
+      if (i>1) daysum <- daysum + nodays[i-1] # if past the first year add 365|366
+      print(paste(daysum+1, daysum+30))
+      june[i,] <- (y[daysum+1:30] > 0) * 1 # turn into indicators
+  }
+
+  n00 <- sum(june[,1:29] == 0 & june[,2:30] == 0)
+  n10 <- sum(june[,1:29] == 1 & june[,2:30] == 0)
+  n01 <- sum(june[,1:29] == 0 & june[,2:30] == 1)
+  n11 <- sum(june[,1:29] == 1 & june[,2:30] == 1)
+
+  # sanity check
+  sum(n00 + n01 + n10 + n11) == 36*29
+
+  p_hat_00 <- n00 / (n00 + n01)
+  p_hat_01 <- n01 / (n00 + n01)
+  p_hat_10 <- n10 / (n10 + n11)
+  p_hat_11 <- n11 / (n10 + n11)
+
+  P_hat <- rbind(c(p_hat_00, p_hat_01), c(p_hat_10, p_hat_11))
+  colnames(P_hat) <- c("dry", "wet")
+  row.names(P_hat) <- c("dry", "wet")
+
+  N_obs <- rbind(c(n00, n01), c(n10, n11))
+  colnames(N_obs) <- c("dry", "wet")
+  row.names(N_obs) <- c("dry", "wet")
+  P_stderr <- sqrt(P_hat * (1 - P_hat) / rowSums(N_obs))
+  P_hat
+  P_hat - 1.96 * P_stderr
+  P_hat + 1.96 * P_stderr
+\end{lstlisting}
+
+\begin{flalign*}
+  \hat{p}_{12} & = .253 \\
+  \text{CI}_{\hat{p}_{12}} & = (.219,.288) \\
+  \hat{p}_{21} & = .349 \\
+  \text{CI}_{\hat{p}_{21}} & = (.305,.393)
+\end{flalign*}
+
 \item Under the assumption of independent uniform priors, give the
   form of the posterior distributions for the parameters
   $p_{12},p_{21}$. Obtain the posterior and report posterior medians
@@ -113,13 +254,66 @@ Find the posterior corresponding to this prior and generate samples from the pos
     \]
     giving formulas in terms of $\mathbf{P}$ and the stationary
     distribution $\pi$ (which is assumed to exist).
+
+\[
+\Sigma =
+\begin{bmatrix}
+   \frac{p_{11}(1-p_{11})}{n \pi_1} & \frac{-p_{11} p_{12}}{n \pi_1} & 0 & 0 & 0 & 0 \\
+   \frac{-p_{11} p_{12}}{n \pi_1} & \frac{p_{12}(1-p_{12})}{n \pi_1} & 0 & 0 & 0 & 0 \\
+   0 & 0 & \frac{p_{21}(1-p_{21})}{n \pi_2} & \frac{-p_{21} p_{22}}{n \pi_2} & 0 & 0 \\
+   0 & 0 & \frac{-p_{21} p_{22}}{n \pi_2} & \frac{p_{22}(1-p_{22})}{n \pi_2} & 0 & 0 \\
+   0 & 0 & 0 & 0 & \frac{p_{31}(1-p_{31})}{n - (1 -\pi_1 - \pi_2)} & \frac{-p_{31} p_{32}}{n - (1 -\pi_1 - \pi_2)} \\
+   0 & 0 & 0 & 0 & \frac{-p_{31} p_{32}}{n - (1 -\pi_1 - \pi_2)} & \frac{p_{32}(1-p_{32})}{n - (1 -\pi_1 - \pi_2)} \\
+\end{bmatrix}
+\]
+
+or
+
+for $1 \leq i \leq 3$ and $1 \leq j \leq 2$ and $1 \leq k \leq 3$ and $1 \leq l \leq 2$
+
+\begin{displaymath}
+  \Sigma_{p_{ij},p_{kl}} = \left\{
+    \begin{array}{lr}
+      0 & \text{if} ~ i \neq k \\
+      \frac{p_{ij}(1-p_{ij})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j = l \\
+      \frac{-p_{ij}p_{il}}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j \neq l
+    \end{array}
+  \right.
+\end{displaymath}
+
   \item Write out the $9\times 9$ joint asymptotic covariance matrix
     for the MLE
     \[
     \left(\hat p_{11},\hat p_{12},\hat p_{13},\, \hat p_{21},\hat
       p_{22},\hat p_{23},\, \hat p_{31},\hat p_{32},\hat p_{33}\right).
     \]
+
+for $i, j, k, l \in \{ 1, 2, 3 \}$
+
+\begin{displaymath}
+  \Sigma_{p_{ij},p_{kl}} = \left\{
+    \begin{array}{lr}
+      0 & \text{if} ~ i \neq k \\
+      \frac{p_{ij}(1-p_{ij})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j = l \neq 3 \\
+      \frac{-p_{ij}p_{il}}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j \neq l ~ \& ~ j \neq 3 ~ \& ~ l \neq 3 \\
+      \frac{p_{i1}(1 - p_{i1}) + p_{i2}(1 - p_{i2}) - 2p_{i1}p_{i2}}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j = l = 3 \\
+      \frac{p_{ij}(1 - p_{i1} - p_{i2})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ j \neq l = 3 \\
+      \frac{p_{il}(1 - p_{i1} - p_{i2})}{n \pi_i} & \text{if} ~ i = k ~ \&  ~ l \neq j = 3 \\
+    \end{array}
+  \right.
+\end{displaymath}
+
+
   \item Discuss the asymptotic dependences you find.
+
+~\\
+Each state $i$ can be used as a starting point and all points in the
+asymptotic covariance matrix for the MLE may be seen as a trinomial likelihood
+where the elements of the covariance matrix $\Sigma$ may be populated by the
+inverse of the fisher information matrix $I(\theta)$. For each starting point
+the sub matrix has asymptotic dependencies such that any $p_{i1}$ and $p_{i2}$
+are negatively correlated which, because of their sum to one constraint, makes
+sense with our intuition for the model.
   \end{enumerate}
 \end{enumerate}
 
