@@ -186,28 +186,27 @@ expected at a strong statistical level.
   daysum <- 31*3 + 30 + 29 # our start point is this number of days in the future
   for (i in 1:36){
       if (i>1) daysum <- daysum + nodays[i-1] # if past the first year add 365|366
-      print(paste(daysum+1, daysum+30))
       june[i,] <- (y[daysum+1:30] > 0) * 1 # turn into indicators
   }
 
-  n00 <- sum(june[,1:29] == 0 & june[,2:30] == 0)
-  n10 <- sum(june[,1:29] == 1 & june[,2:30] == 0)
-  n01 <- sum(june[,1:29] == 0 & june[,2:30] == 1)
-  n11 <- sum(june[,1:29] == 1 & june[,2:30] == 1)
+  n11 <- sum(june[,1:29] == 0 & june[,2:30] == 0)
+  n21 <- sum(june[,1:29] == 1 & june[,2:30] == 0)
+  n12 <- sum(june[,1:29] == 0 & june[,2:30] == 1)
+  n22 <- sum(june[,1:29] == 1 & june[,2:30] == 1)
 
   # sanity check
-  sum(n00 + n01 + n10 + n11) == 36*29
+  sum(n11 + n12 + n21 + n22) == 36*29
 
-  p_hat_00 <- n00 / (n00 + n01)
-  p_hat_01 <- n01 / (n00 + n01)
-  p_hat_10 <- n10 / (n10 + n11)
-  p_hat_11 <- n11 / (n10 + n11)
+  p_hat_11 <- n11 / (n11 + n12)
+  p_hat_12 <- n12 / (n11 + n12)
+  p_hat_21 <- n21 / (n21 + n22)
+  p_hat_22 <- n22 / (n21 + n22)
 
-  P_hat <- rbind(c(p_hat_00, p_hat_01), c(p_hat_10, p_hat_11))
+  P_hat <- rbind(c(p_hat_11, p_hat_12), c(p_hat_21, p_hat_22))
   colnames(P_hat) <- c("dry", "wet")
   row.names(P_hat) <- c("dry", "wet")
 
-  N_obs <- rbind(c(n00, n01), c(n10, n11))
+  N_obs <- rbind(c(n11, n12), c(n21, n11))
   colnames(N_obs) <- c("dry", "wet")
   row.names(N_obs) <- c("dry", "wet")
   P_stderr <- sqrt(P_hat * (1 - P_hat) / rowSums(N_obs))
