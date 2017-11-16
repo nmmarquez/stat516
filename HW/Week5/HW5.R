@@ -1,16 +1,22 @@
 rm(list=ls())
 
-likfunc <- function(x){
-    b <- exp(x)
-    (.9 - (-exp(-10*b) + exp(-.1*b)))**2
+fnOpt <- function(par) {
+    a <- par[1]
+    b <- par[2]
+    return( ( ((0.1 - qgamma(0.05,a,b))/0.1)^2 + ((10 - qgamma(0.95,a,b))/10)^2) )
 }
 
-test <- optim(0, likfunc, method="Brent", lower=-20, upper=20)
-b <- exp(test$par)
-pgamma(10, shape=1, rate=b) - pgamma(.1, shape=1, rate=b)
-pgamma(10, shape=1, rate=b) - pgamma(.1, shape=1, rate=b)
+opt <- optim(c(1,1),fnOpt,method="L-BFGS-B",lower=c(1e-100,1e-100),upper=c(1000,1000))
 
-Posterior <- rgamma(100000, 4+1, b+.25)
+
+a <- opt$par[1]
+b <- opt$par[2]
+pgamma(10, shape=a, rate=b) - pgamma(.1, shape=a, rate=b)
+pgamma(10, shape=a, rate=b) - pgamma(.1, shape=a, rate=b)
+hist(rgamma(100000, a, b))
+quantile(rgamma(100000, a, b), c(.05, .95))
+
+Posterior <- rgamma(100000, 4+a, b+.25)
 hist(Posterior)
 quantile(Posterior, c(.025, .975))
 qgamma(.025, 4+1, b+.25)

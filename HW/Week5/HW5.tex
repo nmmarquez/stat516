@@ -130,19 +130,19 @@ Find the posterior corresponding to this prior and generate samples from the
 posterior. Give a histogram of the posterior and state a 95\% credible interval.
 
 ~ \\
-If we fix $a$ to 1 then we find a value $b$ for the Gamma distribution
-which satisfies the above criteria.
+Minimizing the following function in R gives us a distribution
+$\text{Gamma(.84,.27)}$ which satisfies the above criteria.
 
-\begin{flalign*}
-  \text{Gamma}(1,b) & \sim \frac{b^a \theta^{a-1}e^{-b \theta}}{\Gamma(a)} \\
-  & = b e^{-b \theta} \\
-  .9 & = \int_{.1}^{10} -e^{\theta b} \\
-  .9 & = -e^{-10 b} + e^{-.1 b} \\
-  b & \approx 1.05 \\
-  \therefore \text{Posterior} & \propto \text{Gamma}(4+1, 1.05 + .25) \\
-  CI_{.95} & = (1.25, 7.86)
-\end{flalign*}
+\begin{lstlisting}
+  fnOpt <- function(par) {
+    a <- par[1]
+    b <- par[2]
+    return( ( ((0.1 - qgamma(0.05,a,b))/0.1)^2 + ((10 - qgamma(0.95,a,b))/10)^2) )
+  }
+\end{lstlisting}
 
+The $95\%$ credible interval obtained from this process yields values
+$(2.94, 19.33)$. A histogram of samples from the posterior follows.
 
 \begin{figure}[h!t]
 \centerline{
@@ -227,7 +227,95 @@ expected at a strong statistical level.
   form of the posterior distributions for the parameters
   $p_{12},p_{21}$. Obtain the posterior and report posterior medians
   and 95\% credible intervals for each of the two parameters.
+
+~\\
+A Uniform(0,1) prior is a Beta(1,1) prior, making the posterior distribution
+beta as well (since the Beta is the 2D Dirichlet distribution, and the Dirichlet
+is the conjugate prior for unrestricted transition matrices).
+
+Specifically, with a Beta(1,1) prior, the posterior
+$p_{ij}\ |\ n_{ij}, n_{ii} \sim Beta(1\ +\ n_{ij},\ 1\ +\ n_{ii})$
+
+This means we can get our posterior medians and confidence intervals easily, as:
+
+\begin{lstlisting}
+posterior_median_p_12 <- qbeta(0.5,1+n12,1+n11)
+posterior_median_p_21 <- qbeta(0.5,1+n21,1+n22)
+posterior_ci_p_12 <- qbeta(c(0.025,0.975),1+n12,1+n11)
+posterior_ci_p_21 <- qbeta(c(0.025,0.975),1+n21,1+n22)
+\end{lstlisting}
+
+Giving us very similar results.
+
+\begin{flalign*}
+  \hat{p}_{12} & = .254 \\
+  \text{CI}_{\hat{p}_{12}} & = (.220,.290) \\
+  \hat{p}_{21} & = .350 \\
+  \text{CI}_{\hat{p}_{21}} & = (.306,.395)
+\end{flalign*}
+
 \item Test the null of independence versus the Markov model, using a likelihood ratio test and a Bayes factor.
+
+The independence model is one with the following transition matrix:
+
+\[
+\begin{bmatrix}
+p_{11} & p_{12} \\
+p_{11} & p_{12}
+\end{bmatrix}
+\]
+
+That is, both rows are identical, and there is only one free parameter in the model.
+We note that in the indendence model, $p_{11}$ is the probability of transitioning to a dry day (given a wet or a dry day) and $p_{12}$ is the probability of transitioning to a wet day (given a dry or wet day).
+
+It is then clear that the MLE of,$p_{11}$, $\hat{p^*_{11}} = \frac{n_{11}+n_{21}}{n}$.
+Similarly the MLE of,$p_{12}$, $\hat{p^*_{12}} = \frac{n_{12}+n_{22}}{n}$.
+
+The likelihood ratio test here is distriuted $\chi^2(df=1)$, as the independent model is found by restricting the alternative model to have $p_{21} = p_{11}$ and $p_{22} = p_{12}$
+
+\begin{lstlisting}
+p_hat_star_11 <- (n11 + n21)/n
+p_hat_star_12 <- (n21 + n22)/n
+lnL_independence <- (n11+n21)*log(p_hat_star_11) + (n21+n22)*log(p_hat_star_12)
+lnL_Markov <- n11*log(p_hat_11) + n12*log(p_hat_12) + n21*log(p_hat_21) + n22*log(p_hat_22)
+
+LR_vs_independence <- 2 * (lnL_Markov - lnL_independence)
+
+LR_vs_independence
+
+pchisq(LR_vs_independence,1,lower.tail=FALSE)
+\end{lstlisting}
+
+Giving us a chi squared value of $167$ with probability $2.47 \times 10^{-38}$.
+
+To get the Bayes Factor, we note that the marginal likelihood of the independence model, $Pr(\textbf{y}\ |\ H_o)$ is given by
+
+\begin{aligned}
+\int_0^1Pr(\textbf{y}\ |\ p_{11},\ H_0)\ p(p_{11}\ |\ H_0) =& \frac{\Gamma(1 + 1)}{\Gamma(1)\Gamma(1)}\int_0^1(p_{11})^{n_{11}+n_{21}+1-1}(1 - p_{11})^{n_{12}+n_{22}+1-1}dp_{11}\\
+=&\frac{\Gamma(1 + 1)}{\Gamma(1)\Gamma(1)}\frac{\Gamma(n_{11} +n_{21} + 1)\Gamma(n_{12} +n_{22} + 1)}{\Gamma(n+1+1)}\\
+=&\frac{\Gamma(n_{11} +n_{21} + 1)\Gamma(n_{12} +n_{22} + 1)}{\Gamma(n+1+1)}
+\end{aligned}
+
+The marginal likelihood for the Markov model, $Pr(\textbf{y}\ |\ H_1)$ is given by
+
+\begin{aligned}
+\int_0^1Pr(\textbf{y}\ |\ p,\ H_1)\ p(p_{11}, p_{21}\ |\ H_1) =&
+\frac{\Gamma(1 + 1)}{\Gamma(1)\Gamma(1)}\frac{\Gamma(1 + 1)}{\Gamma(1)\Gamma(1)}\\
+&\times\int_0^1 \int_0^1(p_{11})^{n_{11}+1-1}(1 - p_{11})^{n_{12}+1-1}(p_{21})^{n_{21}+1-1}(1 - p_{21})^{n_{22}+1-1}dp_{11}dp_{21}\\
+=&\frac{\Gamma(n_{11} + 1)\Gamma(n_{12} + 1)}{\Gamma(n_{11}+n_{12}+1+1)}
+\frac{\Gamma(n_{21} + 1)\Gamma(n_{22} + 1)}{\Gamma(n_{21}+n_{22}+1+1)}\\
+\end{aligned}
+~ \\
+\begin{lstlisting}
+  marginal_indpendence <- exp(lgamma(n11+n21+1) + lgamma(n12+n22+1) - lgamma(n+1))
+  marginal_Markov <- exp(lgamma(n11+1) + lgamma(n12+1) + lgamma(n21+1) +
+                           lgamma(n22+1) - lgamma(n11+n12+2) - lgamma(n21+n22+2))
+
+  BF_vs_independence <- marginal_Markov/marginal_indpendence
+\end{lstlisting}
+
+Giving us a probability $2.39 \times 10^{-32}$
+
 \item Now consider the null of common transition probabilities across
   years versus the alternative that each year possesses its own pair
   of probabilities. First, estimate the probabilities in each year and
@@ -238,6 +326,134 @@ expected at a strong statistical level.
   formally test the hypothesis. Third, evaluate the Bayes factor to
   examine the evidence for each of the two hypotheses. What do you
   conclude?
+
+~\\
+
+\begin{figure}[h!t]
+\centerline{
+	\includegraphics[width=8.1cm]{./probs_over_time.png}
+}
+\end{figure}
+
+First, we loop over all the years to record the year-specific TPMs for June, so we can plot the $logit(p_{ij})$. Then we loop over the years again to calculate the likelihood ratio.
+
+To conduct the LRT, we note that the test statistic is distributed $\chi^2(df=70)$, since there are $36*2=72$ free parameters in the model where each year has its own matrix, and $2$ in the simpler model.
+
+Lastly, we loop over all the years one last time so we can get the marginal likelihood of the year-specific model. Since all the years are independent, our 72-dimensional integral is easy to decompose into 36 that look a lot like the ones we calculated above.
+
+The R code is as follows.
+
+\begin{lstlisting}
+  #### Likelihood Ratio Test
+  yearly_P <- apply(june,1,function(june_year){
+    n11 <- sum(june_year[1:29] == 0 & june_year[2:30] == 0)
+    n12 <- sum(june_year[1:29] == 0 & june_year[2:30] == 1)
+    n21 <- sum(june_year[1:29] == 1 & june_year[2:30] == 0)
+    n22 <- sum(june_year[1:29] == 1 & june_year[2:30] == 1)
+
+    n <- n11 + n12 + n21 + n22
+
+    p_hat_11 <- n11 / (n11 + n12)
+    p_hat_12 <- n12 / (n11 + n12)
+    p_hat_21 <- n21 / (n21 + n22)
+    p_hat_22 <- n22 / (n21 + n22)
+
+    return(c(p_hat_11,p_hat_12,p_hat_21,p_hat_22))
+
+  })
+
+  # Calculate and plot the logit pij as requested
+  logit_p12 <- log(yearly_P[2,]/(1-yearly_P[2,]))
+  logit_p21 <- log(yearly_P[3,]/(1-yearly_P[3,]))
+
+  plot(logit_p12,xlab="year",ylab="logit(p_ij)",pch=1,ylim=c(min(c(logit_p12,logit_p21)),max(c(logit_p12,logit_p21))))
+  points(logit_p21,pch=16)
+  legend("topright",legend=c("p_12","p_21"),pch=c(1,16),border=NA,bty="n")
+
+  # Carry out the LRT
+  yearly_lnL_vector <- apply(june,1,function(june_year){
+    n11 <- sum(june_year[1:29] == 0 & june_year[2:30] == 0)
+    n12 <- sum(june_year[1:29] == 0 & june_year[2:30] == 1)
+    n21 <- sum(june_year[1:29] == 1 & june_year[2:30] == 0)
+    n22 <- sum(june_year[1:29] == 1 & june_year[2:30] == 1)
+
+    n <- n11 + n12 + n21 + n22
+
+    p_hat_11 <- n11 / (n11 + n12)
+    p_hat_12 <- n12 / (n11 + n12)
+    p_hat_21 <- n21 / (n21 + n22)
+    p_hat_22 <- n22 / (n21 + n22)
+
+    lnL <- n11*log(p_hat_11) + n12*log(p_hat_12) + n21*log(p_hat_21) + n22*log(p_hat_22)
+
+    return(lnL)
+
+  })
+
+  # The log-likelihood for the "every year to itself" model is the sum of the log-likelihoods of each year
+  lnL_yearly <- sum(yearly_lnL_vector)
+
+  LR_vs_yearly <- 2 * (lnL_yearly - lnL_Markov)
+
+  pchisq(LR_vs_yearly,36*2-2,lower.tail=FALSE)
+
+  ### Bayes Factor
+  yearly_lnL_marginal_likelihood <- apply(june,1,function(june_year){
+    n11 <- sum(june_year[1:29] == 0 & june_year[2:30] == 0)
+    n12 <- sum(june_year[1:29] == 0 & june_year[2:30] == 1)
+    n21 <- sum(june_year[1:29] == 1 & june_year[2:30] == 0)
+    n22 <- sum(june_year[1:29] == 1 & june_year[2:30] == 1)
+
+    n <- n11 + n12 + n21 + n22
+    n <- n11 + n12 + n21 + n22
+
+    p_hat_11 <- n11 / (n11 + n12)
+    p_hat_12 <- n12 / (n11 + n12)
+    p_hat_21 <- n21 / (n21 + n22)  n11 <- sum(june_year[1:29] == 0 & june_year[2:30] == 0)
+    n12 <- sum(june_year[1:29] == 0 & june_year[2:30] == 1)
+    n21 <- sum(june_year[1:29] == 1 & june_year[2:30] == 0)
+    n22 <- sum(june_year[1:29] == 1 & june_year[2:30] == 1)
+
+    n <- n11 + n12 + n21 + n22
+    n <- n11 + n12 + n21 + n22
+
+    p_hat_11 <- n11 / (n11 + n12)
+    p_hat_22 <- n22 / (n21 + n22)
+
+    this_year_log_marginal <- lgamma(n11+1) + lgamma(n12+1) + lgamma(n21+1) + lgamma(n22+1) - lgamma(n11+n12+2) - lgamma(n21+n22+2)
+
+    return(this_year_log_marginal)
+
+  })
+
+  marginal_yearly <- exp(sum(yearly_lnL_marginal_likelihood))
+
+  BF_vs_yearly <- marginal_yearly/marginal_Markov
+    p_hat_11 <- n11 / (n11 + n12)
+    p_hat_12 <- n12 / (n11 + n12)
+    p_hat_21 <- n21 / (n21 + n22)
+    p_hat_22 <- n22 / (n21 + n22)
+
+    this_year_log_marginal <- lgamma(n11+1) + lgamma(n12+1) + lgamma(n21+1) + lgamma(n22+1) - lgamma(n11+n12+2) - lgamma(n21+n22+2)
+
+    return(this_year_log_marginal)
+
+  })
+
+  marginal_yearly <- exp(sum(yearly_lnL_marginal_likelihood))
+
+  BF_vs_yearly <- marginal_yearly/marginal_Markov
+\end{lstlisting}
+
+On the basis of the likelihood test, we would reject the simpler model where there is a single TPM shared between all Junes in all years in favor of each June getting its own TPM.
+
+On the basis of the Bayes Factor, we would not reject the single TPM for all Junes. In fact, since the simpler model has a marginal likelihood on the order of $10^{16}$ times greater than the TPM-per-yaer model, we would be inclined to view this as strong evidence in favor of the simpler model.
+
+On the one hand, our plot shows a great deal of year-to-year heterogeneity in the transition matrix parameters. The LRT sees this as very important. On the other hand, each of those is based on 29 transitions, from which 2 free parameters are being estimated, so it feels like we might be overfitting a bit, and the Bayes Factor punishes us more heavily here for the high dimensionality of our more complicated model.
+
+Our LRT returns a p-value of $\approx 0.028$, reasonable evidence against the simple model. But our Bayes Factors says that the more complicated model is $\approx 4.39\times10^{-17}$ as probable as our simple model, which is a stronger preference in the opposite direction. It does not seem unreasonable to conclude that a single TPM is the better choice.
+
+
 \end{enumerate}
 \item For ternary observations (i.e., $s=3$ states), consider a Markov
   chain model in which the $3\times 3$ transition probability matrix
