@@ -1,0 +1,158 @@
+Consider the one dimensional integral 
+
+$$
+I = \int_0^1 f(\theta) d \theta = E[f(\theta)]
+$$
+
+Let us say that f is the inverse of the CDF for an exponential distribution. 
+Where $\lambda = 1$.
+
+$$
+\begin{aligned}
+f^{-1}(x) & = 1 - e^{-\lambda x} = \theta \\
+e^{-\lambda x} & = 1 - \theta \\
+-\lambda x & = log(1 - \theta) \\
+x & = \frac{-1}{\lambda}log(1 - \theta) \\
+f(\theta) & = \frac{-1}{\lambda}log(1 - \theta) \\
+F(\theta) & = \lambda^{-1} (x + (1-x)log(1-x))\Big|^1_0 \\
+& = \lambda^{-1}
+\end{aligned}
+$$
+
+We can see that the integral is inded the expected value for a exponential 
+distribution. We could also estimate $I$, $\hat{I}$, using the folowing form.
+
+$$
+\begin{aligned}
+\hat I & = \frac{1}{m} \sum_{t=1}^m f(\theta^{(t)}) \\
+\text{where} \\
+\theta^{(t)} & \sim \text{Uniform}(0,1), ~ t=1,\dots,m \\
+\text{and by CLT} \\
+\sqrt{m} (\hat I - I) & \rightarrow_d \mathcal{N}(0, \text{Var}(f)) \\
+\hat I - I & \rightarrow_d \mathcal{N}(0, \frac{1}{m}\text{Var}(f))
+\end{aligned}
+$$
+We can show this in R via simulation.
+
+```{R warning=FALSE,message=FALSE,error=FALSE}
+rm(list=ls())
+library(dplyr)
+library(parallel)
+set.seed(123)
+```
+
+```{R ImportanceSamplingIntro }
+lambda <- .5
+N <- 100000
+m <- 10000
+exp_mean <- lambda**-1
+exp_var <- lambda**-2 * m**-1
+
+f_func <- function(theta, lambda_=lambda){
+    -lambda_**-1 * log(1 - theta)
+}
+
+
+system.time(results <- unlist(mclapply(1:N, function(x) 
+    ((f_func(runif(m)) %>% mean) - exp_mean), mc.cores=6)))
+
+(mean(results) - 0)**2
+(var(results) - exp_var)**2
+```
+
+This form of variance reveals that the efficiency of the method is detrmined by 
+the variance with respect to the uniform distribution. To achieve an almost 
+constant function we can trivially rewrite the integral 
+
+$$
+\begin{aligned}
+I = \int f(\theta) d \theta &= \int \frac{f(\theta)}{g(\theta)}
+      g(\theta) d \theta = \textbf{E} \Big[ \frac{f(\theta)}{g(\theta)} \Big] \\
+\hat{I} & = \frac{1}{m} \sum_{t=1}^{m} \frac{f(\theta^{(t)})}
+            {g(\theta^{(t)})} \\
+\text{where} \\
+\theta^{(t)} & \sim_{iid} g(\cdot) \\
+\sqrt{m} (\hat{I_m} - I) & \rightarrow_d \mathcal{N}(0, \text{Var}_g(f/g)) \\
+\text{Var}_g(f/g) & = \textbf{E} \Big[ \Big(\frac{f}{g} \Big)^2 \Big] - I^2 \\
+\hat{\text{Var}}_g(f/g) & = \frac{1}{m} \sum_{t=1}^{m} \Bigg( \frac{f(\theta^{(t)})}
+            {g(\theta^{(t)})} \Bigg)^2 - \hat{I}^2 \\
+\end{aligned}
+$$
+
+Here is an example of an $f$ and $g$ that highlight importance sampling.
+Consider the scenario where we wish to estimate the right tail probability 
+$\text{Pr}(\theta > c)$, where $\theta \sim \mathcal{N}(0,1)$, $c$ is large 
+($4.5$) and $\phi$ is the standard normal density function. We wish to estimate.
+
+$$
+\begin{aligned}
+I & = \int_c^{\infty} \phi(\theta) d \theta = \int_{-\infty}^{\infty}
+      \phi(\theta) \textbf{1}_{\{ \theta > c\}} = \textbf{E}_{\phi} 
+      [\textbf{1}_{\{ \theta > c\}}] \\
+\hat{I} & = \frac{1}{m} \sum_{t=1}^{m} \textbf{1}_{\{ \theta^{(t)} > c\}} \\
+\text{Var}(\hat I) & = \frac{1}{m} \text{Var}(1_{\{ \theta > c \}}) \\
+& = \frac{1}{m} \text{Pr}(\theta > c)\text{Pr}(\theta \leq c) \\
+& \approx 3.39 \times 10^{-10} \approx (1.84 \times 10^{-5})^2
+\end{aligned}
+$$
+
+That is a terrible confidence interval for a value that we know is on the order 
+of $10^{-6}$ and we can show that the Monte Carlo estimates in `R` reflect this 
+poor estimate.
+
+```{R}
+set.seed(123)
+c <- 4.5
+m <- 10000
+nsim <- 1000
+lnaive <- sapply(1:nsim, function(x) mean(rnorm(m, 0 , 1) > c))
+hist(lnaive, main="Estimates of I") 
+# well we hit 1 value greater than c maybe like 10 times out of 100
+# not a good estimator, we could increase sample size(m) or....
+```
+
+
+Using a function $g$, which will be a transform of the exponential function 
+we can vastly improve our estimate using Monte Carlo sampling on roughly the 
+same order. This means we will get much better samples with out much increase 
+in computing cost.
+
+$$
+\begin{aligned}
+\theta_1, \dots, \theta_m & \sim_{iid} \text{Exp}(1) + c \\
+g(\theta) & = e^{-(\theta - c)} \textbf{1}_{ \{ \theta^{(t)} > c \} } \\
+\hat{I} & = \frac{1}{m} \sum_{t=1}^m \frac{\phi(\theta^{(t)})}{g(\theta^{(t)})} 
+            \textbf{1}_{ \{ \theta^{(t)} > c \} } \\
+& = \frac{1}{m} \sum_{t=1}^m \frac{\phi(\theta^{(t)})}{g(\theta^{(t)})} \\
+\text{Var}(\hat I) & = \frac{1}{m} \text{Var} \Bigg[ 
+                     \frac{\phi(\theta)}{g(\theta)} 
+                     \textbf{1}_{ \{ \theta > c \} } \Bigg] \\
+& = \frac{1}{m} \Bigg{\{} \textbf{E}_g \Bigg[ 
+                     \frac{\phi^2(\theta)}{g^2(\theta)} 
+                     \textbf{1}_{ \{ \theta > c \} } \Bigg] - 
+                     \Bigg[ \textbf{E}_g \Bigg(
+                     \frac{\phi(\theta)}{g(\theta)} 
+                     \textbf{1}_{ \{ \theta > c \} } \Bigg) \Bigg]^2 
+                     \Bigg{\}} \\
+& = \frac{1}{m} \Big[ \int_c^{\infty} \frac{\phi^2(\theta)}{g(\theta)}
+                      d \theta - \text{Pr} (\theta > c) \Big] \\
+& \approx 1.9474 \times 10^{-15} \approx (4.41 \times 10^{-8})^2
+\end{aligned}
+$$
+
+```{R}
+# now lets do it with g
+
+lexp <- sapply(1:nsim, function(x, offset=0){
+    # note that we are adding by c to our exponential function
+    # which means our indicator function will always be one
+    # we could add a differnt value though our estimator would
+    # not be as good
+    c_ <- c - offset
+    theta <- rexp(m, 1) + c_
+    mean(dnorm(theta) / exp(-(theta - c_)) * (theta>c))
+})
+
+hist(lexp, prob=T) # much better
+curve(dnorm(x, mean(lexp), sqrt(1.9474*10**-15)), add=T)
+```
