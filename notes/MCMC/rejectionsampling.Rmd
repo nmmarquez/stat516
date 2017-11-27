@@ -1,0 +1,44 @@
+# Rejection Sampling
+
+Rejection sampling allows us to sample from some target distribution when we have a proposal distribution. The algorithm works by first drawing a random value, say $u$, that is between zero and one from uniform ($U(0,1)$) distribution. Next a random value for $x$ is drawn from the proposal distribution $f(x)$. Finally there is an acceptance/rejection step that asks: if the probability $u$ is less than the density of $g(x)$ at $x$ divided by the density of $f(x)*A$, then we’ll accept $x$ as having been drawn from $g(x)$; if not, we’ll sample another value for $x$ from $f(x)$ and try again.
+
+```{R rejection_algorithm}
+
+# Rejection sampler
+rm(list=ls())
+library(dplyr)
+set.seed(12345)
+
+fxdivgx <- function(x, inv=T){
+    dens <- (pi * (1 + x^2) * exp(x^2/-2))/sqrt(2 * pi)
+    dens <- ifelse(inv, dens^-1, dens)
+    return(dens)
+}
+
+optval <- optimize(fxdivgx, lower=0, upper=10)
+
+tdens <- function(x){dnorm(x, 0, 1)}
+pdens <- function(x){dcauchy(x, 0, 1)}
+prgen <- function(N){rcauchy(N, 0, 1)}
+curve(tdens(x), -3, 3, ylim=c(0, .8))
+curve(pdens(x), -3, 3, add=T, col="red")
+N <- 1000000
+M <- fxdivgx(optval$minimum, F)
+sampled <- data.frame(proposal=rcauchy(N, 0, 1)) %>% 
+    mutate(targetDensity=tdens(proposal), proposalDensity=pdens(proposal)) %>%
+    mutate(accepted=ifelse(runif(N) < targetDensity / proposalDensity / M, T, F))
+
+hist(sampled$proposal[sampled$accepted], freq = F, col = "grey", breaks = 100)
+curve(tdens(x), -3, 3, add =T, col = "red")
+all.equal(mean(sampled$accepted), M^-1)
+```
+
+```{R optimized_rejection}
+fxdivgx2 <- function(params, inv=T){
+    x <- params[1]
+    Cscale <- 1#exp(params[2]) 
+    dens <- (pi * Cscale * (1 + (x/Cscale)^2) * exp(x^2/-2)) / sqrt(2 * pi)
+    dens <- ifelse(inv, dens^-1, dens)
+    return(dens)
+}
+```

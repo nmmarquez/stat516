@@ -1,0 +1,142 @@
+\documentclass{article} % Uses 10pt
+
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{url}
+\usepackage{amsmath,amssymb,kbordermatrix,graphicx}
+\textwidth6.5in
+\textheight=9.7in  % text height can be bigger for a longer letter
+\setlength{\topmargin}{-0.3in}
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\headsep = 20pt
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+\renewcommand{\baselinestretch}{1.4}
+
+\setlength{\oddsidemargin}{0in}
+
+\oddsidemargin  0.0in \evensidemargin 0.0in
+
+%%\parindent0em
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.0pt}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{}
+\rfoot{}
+\cfoot{}
+
+\newcommand{\ind}{\mbox{$\perp \kern-5.5pt \perp$}}
+
+\newcommand{\sectionname}[1]{\vspace{0.5cm} \noindent {\bf #1}}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large Stat 516, Homework 6}
+\end{center}
+\sectionname{Due date}:  Tuesday, November 28.
+
+\noindent
+{\bf Note}:  Do this homework \emph{individually}.  Do not include any
+R code in your main handout -- just include as an appendix, in compact
+form.
+
+\begin{enumerate}
+\item
+  \begin{enumerate}
+  \item As an illustration of rejection sampling, show how one can
+    generate a draw from $N(0,1)$ by using a Cauchy proposal
+    distribution.  What is the acceptance rate of your sampler?  What
+    is the mean number of trials until acceptance of the Cauchy draw?
+    (The Cauchy has density $1/\left[\pi(1+x^2)\right]$.)
+
+\begin{flalign*}
+  f(x) & = \frac{1}{\sqrt{2 \pi}} \text{exp} \Big( - \frac{x^2}{2} \Big) \\
+  g(x) & = \frac{1}{\pi (1+x^2)} \\
+  \frac{f}{g}(x) & = \frac{\pi (1+x^2) \text{exp} \big( - \frac{x^2}{2} \big)}
+                    {\sqrt{2 \pi}} \\
+  \frac{d}{dx} & = \frac{\pi}{\sqrt{2 \pi}}
+                   - \text{exp} \Big( - \frac{x^2}{2}\Big) x (x^2 - 1) \\
+  \text{set } \frac{d}{dx} \text{ to } 0 \text{ to find } x_M \text{...} \\
+  x_M & = \pm 1 \\
+  M & = \frac{2 \pi}{\sqrt{2 \pi}} \exp \Big( \frac{-1}{2} \Big) \approx 1.52 \\
+  p_a & = \frac{\int_{-\infty}^{\infty} f(x)}{M} = M^{-1} \approx .66 \\
+  \text{Expected number of trails is then} \\
+  E[X] & = p(X \geq 1) + p(X \geq 2) + p(X \geq 3) + \dots \\
+  & = 1 + (1 - p_a) + (1 - p_a)^2 + \dots \\
+  & = \frac{1}{p_a} = M
+\end{flalign*}
+
+  \item Again you wish to generate a draw from $N(0,1)$.  But instead
+    of using the standard Cauchy proposal from (a) you are using a
+    scaled Cauchy with density
+    $1/\left[\pi\gamma(1+(x/\gamma)^2)\right]$, where $\gamma>0$ is a
+    scale parameter.  How would optimally choose $\gamma$?
+  \item Is it possible to generate a draw from a Cauchy distribution
+    using $N(0,1)$ as proposal distribution?
+  \end{enumerate}
+
+\item
+ In this question we will analyze data on 10 power plant pumps using a
+ Poisson gamma model. The number of failures $Y_i$ is assumed to
+ follow a Poisson distribution
+\[ Y_i | \theta_i \sim_{ind} \mbox{Poisson}(\theta_i t_i),\quad i=1,...,10\]
+where $\theta_i$ is the failure rate for pump $i$ and $t_i$ is the length of operation time of the pump (in 1000s of hours). The data is shown below.
+
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{c|cccccccccc}
+Pump & 1&2&3&4&5&6&7&8&9&10\\ \hline
+$t_i$& 94.3&15.7&62.9&126&5.24&31.4&1.05& 1.05& 2.1&10.5\\ \hline
+$y_i$&5&1&5&14&3&19&1&1&4&22
+\end{tabular}
+\end{center}
+\end{table}
+
+A conjugate gamma prior distribution is adopted for the failure rates:
+\[ \theta_i |\alpha,\beta \sim_{iid} \mbox{Gamma}(\alpha,\beta),\quad i=1,...,10,
+\]
+with a hyperprior under which $\alpha$ and $\beta$ are independent and
+\begin{align*}
+\alpha &\sim \mbox{Exponential}(1), &
+\beta &\sim \mbox{Gamma}(0.1,1).
+\end{align*}
+\begin{enumerate}
+\item Carefully show, using Bayes theorem and the conditional independencies in the model description, that the posterior distribution is given by:
+\begin{equation}\label{eq:postpump}
+p( \alpha,\beta,\boldsymbol{\theta} | \mathbf{y} ) \propto \prod_{i=1} \left\{ \Pr( y_i | \theta_i) \times
+p(\theta_i| \alpha,\beta ) \right\} \times \pi(\alpha,\beta)
+\end{equation}
+where $\boldsymbol{\theta}=(\theta_1,...,\theta_{10})$.
+\item By using (\ref{eq:postpump}) write out the steps of a Metropolis-Hastings within Gibbs
+  sampling algorithm to analyze these data.
+
+Hint: First write down the forms for $(\alpha|\beta,\boldsymbol{\theta},\mathbf{y})$, $(\beta|\alpha,\boldsymbol{\theta},\mathbf{y})$, $(\theta_i | \boldsymbol{\theta}_{-i},\alpha,\beta,\mathbf{y})$, for $i=1,...,10$.
+\item Apply your algorithm to the pump data and give histogram
+  representations of the univariate posterior distributions for
+  $\alpha$ and $\beta$ and a scatterplot representing the bivariate
+  posterior distribution.
+\item Analytically integrate $\theta_i$, $i=1,...,10$ from the
+  posterior (\ref{eq:postpump}) and hence give the form, up to
+  proportionality, of the posterior $p(\alpha,\beta|\mathbf{y})$.
+\item Construct a Metropolis-Hastings algorithm, to provide a Markov
+  chain with stationary distribution the posterior
+  $p(\alpha,\beta|\mathbf{y})$.
+\item Implement the algorithm of the previous part, and provide the
+  same univariate and bivariate posteriors that were produced in part (c).
+\item How can you obtain samples from $p(\theta_i|\mathbf{y})$, based on samples from $p(\alpha,\beta|\mathbf{y})$?
+\end{enumerate}
+
+
+
+\end{enumerate}
+
+\end{document}
