@@ -3,7 +3,7 @@
 \usepackage{fancyhdr}
 \usepackage{helvet}
 \usepackage{url}
-\usepackage{amsmath,amssymb,kbordermatrix,graphicx}
+\usepackage{amsmath,amssymb,kbordermatrix,graphicx,color, listings}
 \textwidth6.5in
 \textheight=9.7in  % text height can be bigger for a longer letter
 \setlength{\topmargin}{-0.3in}
@@ -36,11 +36,33 @@
 
 \newcommand{\sectionname}[1]{\vspace{0.5cm} \noindent {\bf #1}}
 
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=R,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
 \begin{document}
 
 \begin{center}
   \textbf{\large Stat 516, Homework 6}
 \end{center}
+\sectionname{ Name}:  Neal Marquez \\
 \sectionname{Due date}:  Tuesday, November 28.
 
 \noindent
@@ -79,8 +101,24 @@ form.
     scaled Cauchy with density
     $1/\left[\pi\gamma(1+(x/\gamma)^2)\right]$, where $\gamma>0$ is a
     scale parameter.  How would optimally choose $\gamma$?
+
+\begin{flalign*}
+  \frac{f}{g}(x) & = \frac{\pi \gamma(1+(x/\gamma)^2) \text{exp} \big( - \frac{x^2}{2} \big)}
+                    {\sqrt{2 \pi}} \\
+  \text{find } \frac{d}{dx} \text{ and set to } 0 \text{ to find } x_M \text{...} \\
+  x_M & = \sqrt{2-\gamma^2} \\
+  M & = \frac{\pi \gamma(1+(2-\gamma^2)/\gamma^2) \text{exp} \big( - \frac{2-\gamma^2}{2} \big)}
+                    {\sqrt{2 \pi}} \\
+  \text{find } \frac{d}{d\gamma} \text{ and set to } 0 \text{ to find optimal } \gamma \text{...} \\
+  \gamma & = 1
+\end{flalign*}
+
   \item Is it possible to generate a draw from a Cauchy distribution
     using $N(0,1)$ as proposal distribution?
+
+No because the integral of $\frac{f}{g}(x)$ is indefinite on the supoort for the
+standard normal distribution for any chosen cauchy distribution when $g$ is the
+normal density and $f$ is cauchy and furthermore M has no set value.
   \end{enumerate}
 
 \item
@@ -116,26 +154,214 @@ p( \alpha,\beta,\boldsymbol{\theta} | \mathbf{y} ) \propto \prod_{i=1} \left\{ \
 p(\theta_i| \alpha,\beta ) \right\} \times \pi(\alpha,\beta)
 \end{equation}
 where $\boldsymbol{\theta}=(\theta_1,...,\theta_{10})$.
+
+\begin{flalign*}
+  p(\alpha, \beta, \boldsymbol{\theta} | \boldsymbol{y}) & \propto
+    p(\boldsymbol{y} | \alpha, \beta, \boldsymbol{\theta}) \times
+    p(\alpha, \beta, \boldsymbol{\theta}) \\
+  p(\boldsymbol{y} | \alpha, \beta, \boldsymbol{\theta}) & =
+    \prod_{i=1} \frac{(t_i \theta_i)^{y_i} e^{-t_i \theta_i}}{y_i !} =
+    \prod_{i=1} \text{Pr}(y_i | \theta_i) \\
+  p(\alpha, \beta, \boldsymbol{\theta}) & = \pi(\alpha, \beta)
+    \prod_{i=1} \frac{\beta^{\alpha} \theta_i^{\alpha - 1} e^{-b \theta_i}}
+                     {\Gamma(\alpha)} =
+    \prod_{i=1} \left\{ p(\theta_i| \alpha,\beta ) \right\} \times \pi(\alpha,\beta)
+\end{flalign*}
+
 \item By using (\ref{eq:postpump}) write out the steps of a Metropolis-Hastings within Gibbs
   sampling algorithm to analyze these data.
 
 Hint: First write down the forms for $(\alpha|\beta,\boldsymbol{\theta},\mathbf{y})$, $(\beta|\alpha,\boldsymbol{\theta},\mathbf{y})$, $(\theta_i | \boldsymbol{\theta}_{-i},\alpha,\beta,\mathbf{y})$, for $i=1,...,10$.
+
+\begin{flalign*}
+  p(\theta_i | \boldsymbol{\theta}_{-i},\alpha,\beta,\mathbf{y}) & \propto
+    \prod_{i=1} \frac{(t_i \theta_i)^{y_i} e^{-t_i \theta_i}}{y_i !}
+                \frac{\beta^{\alpha} \theta_i^{\alpha - 1} e^{-b \theta_i}}
+                     {\Gamma(\alpha)}  \\
+    & \propto \text{Gamma}(y_i + \alpha, \beta + t_i) \\
+    & \therefore ~~ \theta_i \ind \boldsymbol{\theta}_{-i},
+      \mathbf{y}_{-i} | y_i, \alpha, \beta \\
+  p(\beta|\alpha,\boldsymbol{\theta},\mathbf{y}) & \propto
+    \left\{ \prod_{i=1} \beta^\alpha e^{-\beta \theta_i} \right\}
+    \Gamma(.1)^{-1} \beta^{-.9} e^{-\beta} \\
+    & = \beta^{10a - .9}e^{-\beta(1 + \sum_{i=1} \theta_i)} \\
+    & \propto \text{Gamma}(10\alpha + .1, 1 + \sum_{i=1} \theta_i) \\
+    & \therefore ~~ \beta \ind \mathbf{y} | \boldsymbol{\theta}, \alpha \\
+    p(\alpha|\beta,\boldsymbol{\theta},\mathbf{y}) & =
+      e^{-\alpha}\beta^{10 \alpha} \Gamma(\alpha)^{-10} \prod_{i=1} \theta_i^{\alpha - 1} \\
+    & \therefore \alpha \ind \mathbf{y} | \boldsymbol{\theta} \beta
+\end{flalign*}
+
+ Algorithm...
+
+\begin{enumerate}
+  \item Choose staring values for parameters $\boldsymbol{\theta}, \alpha, \beta$
+  \item Update values of $\theta_i$ using last iteration of $\alpha$ and $\beta$
+        with the distribution $\text{Gamma}(y_i + \alpha, \beta + t_i)$
+  \item Update $\beta$ using last iteration of $\alpha$ and current
+        $\boldsymbol{\theta}$ with the distribution \\
+        $\text{Gamma}(10 \alpha + 1, 1 + \sum_{i=1} \theta_i)$
+  \item simulate a value $u$ which is distributed $\text{Uniform}(0,1)$
+  \item propose a new value of $\alpha$, $\alpha^{\star}$, which is distributed
+        $\mathcal{N}(\alpha, .2)$
+  \item accept $\alpha^{\star}$ as the new $\alpha$ if $\alpha^{\star} > 0$ and
+        $u < \frac{p(\alpha^{\star}|\beta,\boldsymbol{\theta})}{p(\alpha|\beta,\boldsymbol{\theta})}$
+  \item repeat steps ii-vi 1000000 times recording each new iteration of
+        parameters $\boldsymbol{\theta}, \alpha, \beta$
+\end{enumerate}
+
 \item Apply your algorithm to the pump data and give histogram
   representations of the univariate posterior distributions for
   $\alpha$ and $\beta$ and a scatterplot representing the bivariate
   posterior distribution.
+
+\includegraphics[width=10cm]{/home/nyanyan/Documents/Classes/stat516/HW/Week6/alpha_posterior.png} \\
+\includegraphics[width=10cm]{/home/nyanyan/Documents/Classes/stat516/HW/Week6/beta_posterior.png} \\
+\includegraphics[width=10cm]{/home/nyanyan/Documents/Classes/stat516/HW/Week6/bvphyper.png} \\
+
 \item Analytically integrate $\theta_i$, $i=1,...,10$ from the
   posterior (\ref{eq:postpump}) and hence give the form, up to
   proportionality, of the posterior $p(\alpha,\beta|\mathbf{y})$.
+
+  \begin{flalign*}
+    p(\alpha, \beta | \mathbf{y}) & \propto
+      \beta^{10a - .9}e^{-\beta(1 + \sum_{i=1} \theta_i)}
+      e^{-\alpha}\beta^{10 \alpha} \Gamma(\alpha)^{-10} \prod_{i=1}
+      \theta_i^{\alpha - 1} \\
+    & = \beta^{20\alpha - .9} e^{-\beta(1 + \sum_{i=1} \theta_i) - \alpha}
+    \Gamma(\alpha)^{-10} \prod_{i=1} \theta_i^{\alpha - 1} \\
+  \end{flalign*}
+
 \item Construct a Metropolis-Hastings algorithm, to provide a Markov
   chain with stationary distribution the posterior
   $p(\alpha,\beta|\mathbf{y})$.
+
+  \begin{enumerate}
+    \item Choose staring values for parameters $\alpha, \beta$
+    \item simulate a value $u$ which is distributed $\text{Uniform}(0,1)$
+    \item propose a new value of $\alpha$, $\alpha^{\star}$, which is distributed
+          $\mathcal{N}(\alpha, .2)$ and $\beta$, $\beta^{\star}$, which is distributed
+                $\mathcal{N}(\beta, .2)$
+    \item accept $\alpha^{\star}$ and $\beta^{\star}$ as the new $\alpha$ and $\beta$ if $\alpha^{\star} > 0$, $\beta^{\star} > 0$, and
+          $log(u) < log(p(\alpha^{\star},\beta^{\star}|\mathbf{y})) - log(p(\alpha,\beta|\mathbf{y}))$
+    \item repeat steps ii-iv 1000000 times recording each new iteration of
+          parameters $\boldsymbol{\theta}, \alpha, \beta$
+  \end{enumerate}
+
 \item Implement the algorithm of the previous part, and provide the
   same univariate and bivariate posteriors that were produced in part (c).
+
+  \includegraphics[width=10cm]{/home/nyanyan/Documents/Classes/stat516/HW/Week6/alpha_joint_post.png} \\
+  \includegraphics[width=10cm]{/home/nyanyan/Documents/Classes/stat516/HW/Week6/beta_joint_post.png} \\
+  \includegraphics[width=10cm]{/home/nyanyan/Documents/Classes/stat516/HW/Week6/beta_alpha_joint_post.png} \\
+
 \item How can you obtain samples from $p(\theta_i|\mathbf{y})$, based on samples from $p(\alpha,\beta|\mathbf{y})$?
+
+  You can sample from $p(\theta_i|\mathbf{y})$ by using a the samples directly from
+  the smaples of $p(\alpha,\beta|\mathbf{y})$.
 \end{enumerate}
 
+Code appendix
 
+\begin{lstlisting}
+rm(list=ls())
+library(dplyr)
+library(ggplot2)
+library(MASS)
+library(RColorBrewer)
+
+Y <- c(5, 1, 5, 14, 3, 19, 1, 1, 4, 22)
+E <- c(94.3, 15.7, 62.9, 126, 5.24, 31.4, 1.05,  1.05,  2.1, 10.5)
+N <- length(Y)
+
+nchain <- 100000
+burnin <- 10000
+
+proposalfunction <- function(param){
+    return(rnorm(1, mean=param, sd=.2))
+}
+
+lambda.post <- matrix(1, nrow=N, ncol=nchain)
+b0.post <- rep(1, nchain)
+a0.post <- rep(2, nchain)
+a0 <- 6
+b0 <- 1
+
+for(i in 2:nchain){
+    lambda.post[,i] <- lambda <- rgamma(N, a0 + Y, b0 + E)
+    b0.post[i] <- b0 <- rgamma(1, N * a0 + ha, sum(lambda) + hb)
+
+    astar <- proposalfunction(a0)
+    # generate a probability of accepting that is g(p*)/g(pi)
+    paccept <- prod(lambda)^(astar-a0) * b0^(N * (astar-a0)) *
+        (gamma(astar)/gamma(a0))^-N * exp(-astar+a0)
+    if (astar > 0 & runif(1) < paccept){
+        a0 <- astar
+    }
+    a0.post[i] <- a0
+}
+
+plot(a0.post, type="l")
+plot(b0.post, type="l")
+
+for(i in 1:N){
+    title_ <- paste0("Posterior Density for y_", i)
+    plot(density(lambda.post[i, burnin:nchain]), main=title_)
+}
+
+plot(density(b0.post[burnin:nchain]), main="Posterior of Beta")
+plot(density(a0.post[burnin:nchain]), main="Posterior of Alpha")
+hist(b0.post[burnin:nchain], nclass=30, main="Posterior of Beta", xlab="")
+hist(a0.post[burnin:nchain], nclass=30, main="Posterior of Alpha", xlab="")
+
+k <- 11
+my.cols <- rev(brewer.pal(k, "RdYlBu"))
+
+z <- kde2d(a0.post[burnin:nchain], b0.post[burnin:nchain], n=50)
+
+plot(a0.post[burnin:nchain], b0.post[burnin:nchain],
+     xlab=expression(alpha),  ylab=expression(beta), pch=19, cex=.4,
+     main="Bivariate Posterior of Hyperparameters")
+contour(z, drawlabels=FALSE, nlevels=k, col=my.cols, add=TRUE)
+
+
+# sample the joint posterior of alpha and beta
+b0joint.post <- rep(1, nchain)
+a0joint.post <- rep(2, nchain)
+a0 <- 1
+b0 <- 1
+
+posterior <- function(a, b, theta=lambda.post[,N]){
+    20 * a*log(b) - log(b^.9) + (-b*(1 + sum(theta)) - a) +
+        log(gamma(a)^(-10)) + log(prod(theta^(a-1)))
+}
+
+for(i in 2:nchain){
+    astar <- proposalfunction(a0)
+    bstar <- proposalfunction(b0)
+    # generate a probability of accepting that is g(p*)/g(pi)
+    paccept <- posterior(astar, bstar, theta=lambda.post[,i]) -
+        posterior(a0, b0, theta=lambda.post[,i])
+    if (astar > 0 & bstar > 0 & log(runif(1)) < paccept){
+        a0 <- astar
+        b0 <- bstar
+    }
+    a0joint.post[i] <- a0
+    b0joint.post[i] <- b0
+}
+
+hist(b0joint.post[burnin:nchain], nclass=30,
+     main="Posterior of Beta Given y", xlab="")
+hist(a0joint.post[burnin:nchain], nclass=30,
+     main="Posterior of Alpha Given y", xlab="")
+
+z <- kde2d(a0joint.post[burnin:nchain], b0joint.post[burnin:nchain], n=50)
+
+plot(a0joint.post[burnin:nchain], b0joint.post[burnin:nchain],
+     xlab=expression(alpha),  ylab=expression(beta), pch=19, cex=.4,
+     main="Bivariate Posterior of Hyperparameters given y")
+contour(z, drawlabels=FALSE, nlevels=k, col=my.cols, add=TRUE)
+\end{lstlisting}
 
 \end{enumerate}
 
