@@ -121,6 +121,9 @@ for(i in 2:nchain){
     b0joint.post[i] <- b0
 }
 
+plot(a0joint.post[burnin:nchain], type="l")
+plot(b0joint.post[burnin:nchain], type="l")
+
 hist(b0joint.post[burnin:nchain], nclass=30, 
      main="Posterior of Beta Given y", xlab="")
 hist(a0joint.post[burnin:nchain], nclass=30, 

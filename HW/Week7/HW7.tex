@@ -1,0 +1,169 @@
+\mathbf{y}\documentclass{article} % Uses 10pt
+%\input{definitions}
+
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{url}
+\usepackage{amsmath,amssymb,kbordermatrix,graphicx}
+\textwidth6.5in
+\textheight=9.7in  % text height can be bigger for a longer letter
+\setlength{\topmargin}{-0.3in}
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\headsep = 20pt
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+\renewcommand{\baselinestretch}{1.4}
+
+\setlength{\oddsidemargin}{0in}
+
+\oddsidemargin  0.0in \evensidemargin 0.0in
+
+%%\parindent0em
+
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.0pt}
+\lhead{}
+\chead{}
+\rhead{}
+\lfoot{}
+\rfoot{}
+\cfoot{}
+
+\newcommand{\ind}{\mbox{$\perp \kern-5.5pt \perp$}}
+
+\newcommand{\sectionname}[1]{\vspace{0.5cm} \noindent {\bf #1}}
+
+\begin{document}
+
+\begin{center}
+  \textbf{\large Stat 516, Homework 7}
+\end{center}
+\sectionname{Due date}:  Thursday, December 7.
+
+\noindent
+{\bf Note}: Do this homework \emph{in pairs} under the usual rules.
+
+
+\begin{enumerate}
+
+
+
+\item This problem is a simple illustration of how the
+  introduction of suitable complete data $\mathbf{x}$ can help address
+  questions about observed data $\mathbf{y}$.
+\begin{enumerate}
+\item
+Consider data $\mathbf{y}=[y_1,y_2,y_3,y_4]=[125,18,20,34]$ which are multinomially distributed and for which a genetic model suggests the cell probabilities are
+$$\left[ \frac{1}{2} + \frac{\pi}{4},\frac{1-\pi}{4},\frac{1-\pi}{4},\frac{\pi}{4}
+\right]
+$$
+with $0 \leq \pi \leq 1$.
+Hence,
+$$p(\mathbf{y}|\pi) = \frac{(y_1+y_2+y_3+y_4)!}{y_1!y_2!y_3!y_4!}
+\left(\frac{1}{2}+ \frac{\pi}{4}\right)^{y_1}\left(\frac{1-\pi}{4}\right)^{y_2}\left(\frac{1-\pi}{4}\right)^{y_3}\left(\frac{\pi}{4}\right)^{y_4}.$$
+
+Develop an EM algorithm for computation of the maximum likelihood
+estimate of $\pi$.  To this end, consider {\it complete data} $x_1$,
+$x_2$, $x_3$, $x_4$, $x_5$ that follow a multinomial distribution with
+cell probabilities
+$$\left[ \frac{1}{2},\frac{\pi}{4},\frac{1-\pi}{4},\frac{1-\pi}{4},\frac{\pi}{4}
+\right].
+$$
+Explain how you relate $x$ to $y$ and carefully write down the E
+and M steps of the EM algorithm.  Implement the algorithm for the data
+given above.
+\smallskip
+
+Considering four arbitrary positive counts, can the
+likelihood function of the above model for $\mathbf{y}$ have more than one local
+maximum?
+
+\item Now consider a Bayesian analysis with a Be$(1,1)$ prior on
+  $\pi$. Write out the details of an auxiliary variable scheme that
+  samples $p(\mathbf{x}|\mathbf{y},\pi)$ and $p(\pi|\mathbf{x})$. Implement this algorithm
+  for the given data.
+\end{enumerate}
+
+\item In this problem you are asked to experiment with the
+  forward-backward algorithm for HMMs, which computes the conditional
+  probabilities $p(z_i\,|\,x)$ for each one of the hidden states
+  $z_i$.  To this end, consider the `Occasionally dishonest Casino'
+  example. Assume that 1=fair dice, 2=loaded dice and use transition
+  probabilities
+  \[
+  \mathbf{P} =
+  \kbordermatrix{ &1&2\\
+    1&0.95 & 0.05 \\
+    2&0.10 & 0.90
+  },
+  \]
+  emission probabilities
+  \[
+  \mathbf{E} =
+  \kbordermatrix{ & 1&2&3&4&5&6\\
+    1 &\frac{1}{6} & \frac{1}{6} &  \frac{1}{6} & \frac{1}{6} &
+    \frac{1}{6} &  \frac{1}{6}  \\
+    2&\frac{1}{10} & \frac{1}{10} & \frac{1}{10} &
+    \frac{1}{10} & \frac{1}{10}& \frac{1}{2}
+  },
+  \]
+  and initial distribution $\boldsymbol{\nu} = (\frac{1}{2}, \frac{1}{2})$.
+  \begin{enumerate}
+  \item Code up your own implementation of the forward-backward
+    algorithm as first derived in class, that is, simply compute
+    probabilities without any rescaling or considering logarithms.
+    Run the algorithm for different simulated data sets and report on
+    the sequence lengths for which you start experiencing numerical
+    problems.  (In R, the command {\tt sample} is useful for such
+    simulations.  Also be sure to set a seed for random number
+    generation via the {\tt set.seed} command in order to be able to
+    reproduce your simulation results.)
+  \item Modify your implementation from (a) to compute all
+    probabilities on a log-scale using the fact
+    \[
+    \log(a+b) = \log(a) + \log\big(1+e^{\log(b)-\log(a)}\big).
+    \]
+    Does this resolve possible numerical issues with longer sequences
+    when choosing $a$ to be the larger of any two summands?
+  \item Modify your implementation from (a) to work with rescaled
+    probabilities as discussed in class/in the handout from the book
+    by Bishop.  Does this resolve possible numerical issues with
+    longer sequences?  Compare to your results in (b).
+  \end{enumerate}
+
+
+\item (Guttorp Exercise 2.14.D8) The data in Guttorp's data set 3
+  consists of four years of hourly average wind directions a the
+  Koeberg weather station in South Africa.\footnote{The data set is
+    available at {\tt
+      http://www.stat.washington.edu/peter/book.data/set3}
+  } The period covered is 1 May 1985 through 30
+  April 1989.  The average is a vector average, categorized into 16
+  wind directions from N (1), NNE (2), \dots to NNW (16).  Analyze the
+  data using a hidden Markov model, with 2 hidden states, and
+  conditionally upon the state a multinomial observation with 16
+  categories.  Does the fitted model separate out different weather
+  patterns?  Also estimate the underlying states, and look for
+  seasonal behavior in the sequence of states.
+
+  I strongly encourage you to write your own implementations of the
+  relevant algorithms but you are also allowed to use existing
+  routines in R or similar software to do this problem; in that case
+  indicate which software you used.
+
+  Provide a concise, well-written report of your work, showing
+  graphics to support your conclusions.  Any plots you include should
+  have clearly labelled axes.  You do not need to turn in your
+  computer code as part of your solution but you should keep your code
+  and be ready to email it to the grader/instructor if contacted about
+  it after the homework is due.  (Zero points if you can't provide
+  your own code when asked to email it or if the code does not give
+  the results you described.)
+
+\end{enumerate}
+
+\end{document}
