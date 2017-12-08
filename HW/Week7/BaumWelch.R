@@ -107,42 +107,76 @@ est$v
 # read in file to run analysis on
 weather <- c(t(as.matrix(read.table("./set3.dat", sep=""))))
 estDat <- baumWelchSelf(weather, niter=500, emissions = 1:16)
-# HMMobj <- initHMM(
-#     1:2, 1:16, rep(1/2, 2),
-#     matrix(c(.8, 1/3, .2, 2/3), 2, 2), 
-#     matrix(c(rep(1/16, 16), rep(1/16, 16)), 2, 16, byrow=T))
-# estDatPackage <- baumWelch(HMMobj, weather)
-# estDatPackage$hmm$transProbs
 estDat$P
-# estDatPackage$hmm$emissionProbs
 estDat$E
-# abs((estDatPackage$hmm$emissionProbs - estDat$E)/ estDat$E)
 
-plot(log(estDat$delta), type="l")
-plot(estDat$gamma[1,1:(30*24)], type="l")
+png("./DeltaLogLik.png", height=480*2, width=600*2)
+data.frame(deltaloglik=log(estDat$delta) , iter=1:length(estDat$delta)) %>% 
+    ggplot(aes(x=iter, y=deltaloglik)) + geom_line() + 
+    labs(title="Change in Log Likelihood Across Iterations",
+         x="Iteration", y="Delta Log Likelihood") +
+    theme(axis.text = element_text(size = 25)) +
+    theme(plot.title = element_text(size = 25)) +
+    theme(axis.title = element_text(size = 25))
+dev.off()
 
 DFHMM <- data.frame(
     pHS1=estDat$gamma[1,], 
     date=seq(ISOdate(1985, 5, 1, 0), by=3600, len=length(weather))) %>%
     mutate(
     month=as.integer(as.character(date, format="%m")),
+    Month=factor(month.name[month], month.name),
     year=as.integer(as.character(date, format="%Y")),
     day=as.integer(as.character(date, format="%d")),
     hour=as.integer(as.character(date, format="%H")),
     dayhour=day + hour/24)
 
 plot_calendar <- function(DF, x="dayhour"){
-    ggplot(DF, aes_string(x=x, y="pHS1", color="month")) + geom_line() + 
-        facet_wrap(~month)
+    ggplot(DF, aes_string(x=x, y="pHS1", color="Month")) + geom_line() + 
+        facet_wrap(~Month)
 }
 
-DFHMM %>% filter(year==1986) %>% plot_calendar
-
-DFHMM %>% group_by(month,day,hour) %>% summarise(pHS1=mean(pHS1)) %>% 
-    mutate(dayhour=day + hour/24) %>% plot_calendar()
-
-DFHMM %>% group_by(month,day) %>% summarise(pHS1=mean(pHS1)) %>% 
-     plot_calendar(x="day")
-    
+png("./ProbByMonth.png", height=480*2, width=600*2)
 DFHMM %>% group_by(month) %>% summarise(pHS1=mean(pHS1)) %>%
-    ggplot(aes(x=month, y=pHS1)) + geom_line()
+    ggplot(aes(x=month, y=pHS1)) + geom_line() + 
+    labs(x="Month", y="Probability of Hidden State 1",
+         title="Average Hidden State 1 Probability By Month") +
+    theme(axis.text = element_text(size = 25)) +
+    theme(plot.title = element_text(size = 25)) +
+    theme(axis.title = element_text(size = 25))
+dev.off()
+
+png("./ProbByDay.png", height=480*2, width=600*2)
+DFHMM %>% group_by(Month, day) %>% summarise(pHS1=mean(pHS1)) %>% 
+    plot_calendar(x="day") + 
+    labs(x="Day", y="Probability of Hidden State 1",
+         title="Average Hidden State 1 Probability By Day") +
+    scale_color_discrete(guide=FALSE) +
+    theme(axis.text = element_text(size = 25)) +
+    theme(plot.title = element_text(size = 25)) +
+    theme(axis.title = element_text(size = 25))
+dev.off()
+
+png("./ProbByHour.png", height=480*2, width=600*2)
+DFHMM %>% group_by(Month,day,hour) %>% summarise(pHS1=mean(pHS1)) %>% 
+    mutate(dayhour=day + hour/24) %>% plot_calendar() + 
+    labs(x="Day", y="Probability of Hidden State 1",
+         title="Average Hidden State 1 Probability By Hour") +
+    scale_color_discrete(guide=FALSE) +
+    theme(axis.text = element_text(size = 25)) +
+    theme(plot.title = element_text(size = 25)) +
+    theme(axis.title = element_text(size = 25))
+dev.off()
+
+png("./EmissionPrHeatMap.png", height=480*2, width=680*2)
+data.frame(Probability=c(t(estDat$E)), y=rep(c("1", "2"), each=16), 
+           x=rep(1:16, 2)) %>%
+    ggplot(aes(x=x, y=y, fill=Probability)) + geom_tile() + 
+    labs(y="Hidden State", x="Wind Direction Emission",
+         title="Emission Probability Heat Map") +
+    theme(axis.text = element_text(size = 25)) +
+    theme(plot.title = element_text(size = 25)) +
+    theme(axis.title = element_text(size = 25)) + 
+    theme(legend.title = element_text(size = 25)) +
+    theme(legend.text = element_text(size = 20))
+dev.off()
