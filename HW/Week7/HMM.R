@@ -107,10 +107,10 @@ set.seed(124)
 # First We ant to test to make sure our implementation returns the same result 
 # as the known working implementation
 sims1 <- simulate_run(10) # simulate values
-log_forward_prob_package <- forward(HMMobj, sims1$O) # calc log probs using HMM
-forward_prob_package <- exp(log_forward_prob_package) # exponentiate to get raw probs
-log_forward_prob_self <- forward_algorithm(sims1$O, log_=T)
-forward_prob_self <- forward_algorithm(sims1$O, log_=F) # run our function
+(log_forward_prob_package <- forward(HMMobj, sims1$O)) # calc log probs using HMM
+(forward_prob_package <- exp(log_forward_prob_package)) # exponentiate to get raw probs
+(log_forward_prob_self <- forward_algorithm(sims1$O, log_=T))
+(forward_prob_self <- forward_algorithm(sims1$O, log_=F)) # run our function
 all.equal(c(forward_prob_package), c(forward_prob_self[,-1])) # test for similarity
 all.equal(c(log_forward_prob_package), c(log_forward_prob_self[,-1]))
 
