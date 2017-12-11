@@ -42,6 +42,18 @@ backward_algorithm <- function(obs, E, P, v, states){
     return(prob_seq)
 }
 
+backward_algorithm <- function(obs, E, P, v, states){
+    n <- length(obs)
+    prob_seq <- matrix(0, nrow=nrow(E), ncol=n+1)
+    prob_seq[,n+1] <- c(1, 1)
+    for(i in n:1){
+        prob_seq[,i] <- c((prob_seq[,i+1] * E[,obs[i]]) %*% t(P))
+        prob_seq[,i] <- prob_seq[,i] / sum(prob_seq[,i])
+    }
+    return(prob_seq)
+}
+
+
 baumWelchSelf <- function(obs, niter=99, states=1:2, emissions=1:6, delta=1e-9){
     # initialize parameters
     nStates <- length(states)
@@ -115,9 +127,9 @@ data.frame(deltaloglik=log(estDat$delta) , iter=1:length(estDat$delta)) %>%
     ggplot(aes(x=iter, y=deltaloglik)) + geom_line() + 
     labs(title="Change in Log Likelihood Across Iterations",
          x="Iteration", y="Delta Log Likelihood") +
-    theme(axis.text = element_text(size = 25)) +
-    theme(plot.title = element_text(size = 25)) +
-    theme(axis.title = element_text(size = 25))
+    theme(axis.text = element_text(size = 40)) +
+    theme(plot.title = element_text(size = 40)) +
+    theme(axis.title = element_text(size = 40))
 dev.off()
 
 DFHMM <- data.frame(
@@ -141,9 +153,9 @@ DFHMM %>% group_by(month) %>% summarise(pHS1=mean(pHS1)) %>%
     ggplot(aes(x=month, y=pHS1)) + geom_line() + 
     labs(x="Month", y="Probability of Hidden State 1",
          title="Average Hidden State 1 Probability By Month") +
-    theme(axis.text = element_text(size = 25)) +
-    theme(plot.title = element_text(size = 25)) +
-    theme(axis.title = element_text(size = 25))
+    theme(axis.text = element_text(size = 40)) +
+    theme(plot.title = element_text(size = 40)) +
+    theme(axis.title = element_text(size = 40))
 dev.off()
 
 png("./ProbByDay.png", height=480*2, width=600*2)
@@ -152,9 +164,9 @@ DFHMM %>% group_by(Month, day) %>% summarise(pHS1=mean(pHS1)) %>%
     labs(x="Day", y="Probability of Hidden State 1",
          title="Average Hidden State 1 Probability By Day") +
     scale_color_discrete(guide=FALSE) +
-    theme(axis.text = element_text(size = 25)) +
-    theme(plot.title = element_text(size = 25)) +
-    theme(axis.title = element_text(size = 25))
+    theme(axis.text = element_text(size = 40)) +
+    theme(plot.title = element_text(size = 40)) +
+    theme(axis.title = element_text(size = 40))
 dev.off()
 
 png("./ProbByHour.png", height=480*2, width=600*2)
@@ -163,9 +175,9 @@ DFHMM %>% group_by(Month,day,hour) %>% summarise(pHS1=mean(pHS1)) %>%
     labs(x="Day", y="Probability of Hidden State 1",
          title="Average Hidden State 1 Probability By Hour") +
     scale_color_discrete(guide=FALSE) +
-    theme(axis.text = element_text(size = 25)) +
-    theme(plot.title = element_text(size = 25)) +
-    theme(axis.title = element_text(size = 25))
+    theme(axis.text = element_text(size = 40)) +
+    theme(plot.title = element_text(size = 40)) +
+    theme(axis.title = element_text(size = 40))
 dev.off()
 
 png("./EmissionPrHeatMap.png", height=480*2, width=680*2)
@@ -174,9 +186,9 @@ data.frame(Probability=c(t(estDat$E)), y=rep(c("1", "2"), each=16),
     ggplot(aes(x=x, y=y, fill=Probability)) + geom_tile() + 
     labs(y="Hidden State", x="Wind Direction Emission",
          title="Emission Probability Heat Map") +
-    theme(axis.text = element_text(size = 25)) +
-    theme(plot.title = element_text(size = 25)) +
-    theme(axis.title = element_text(size = 25)) + 
-    theme(legend.title = element_text(size = 25)) +
-    theme(legend.text = element_text(size = 20))
+    theme(axis.text = element_text(size = 40)) +
+    theme(plot.title = element_text(size = 40)) +
+    theme(axis.title = element_text(size = 40)) + 
+    theme(legend.title = element_text(size = 40)) +
+    theme(legend.text = element_text(size = 30))
 dev.off()

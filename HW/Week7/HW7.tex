@@ -1,4 +1,4 @@
-\mathbf{y}\documentclass{article} % Uses 10pt
+\documentclass{article} % Uses 10pt
 %\input{definitions}
 
 \usepackage{fancyhdr}
@@ -45,7 +45,7 @@
 \sectionname{Due date}:  Thursday, December 7.
 
 \noindent
-{\bf Note}: Do this homework \emph{in pairs} under the usual rules.
+{\bf Name}: Neal Marquez \& Anne Polyakov
 
 
 \begin{enumerate}
@@ -78,14 +78,76 @@ and M steps of the EM algorithm.  Implement the algorithm for the data
 given above.
 \smallskip
 
+\begin{flalign*}
+  P(\mathbf{x} | \pi) & = \frac{x_1+x_2+x_3+x_4+x_5}{x_1!x_2!x_3!x_4!x_5!}
+      \Big(\frac{1}{2}\Big)^{x_1} \Big(\frac{\pi}{4}\Big)^{x_2}
+      \Big(\frac{1-\pi}{4}\Big)^{x_3} \Big(\frac{1-\pi}{4}\Big)^{x_4}
+      \Big(\frac{\pi}{4}\Big)^{x_5} \\
+  \text{log} P(\mathbf{x} | \pi) & = c +
+      x_1\text{log}\Big(\frac{1}{2}\Big) +
+      x_2\text{log}\Big(\frac{\pi}{4}\Big) +
+      x_3\text{log}\Big(\frac{1-\pi}{4}\Big) +
+      x_4\text{log}\Big(\frac{1-\pi}{4}\Big) +
+      x_5\text{log}\Big(\frac{\pi}{4}\Big)
+\end{flalign*}
+
+E Step
+\begin{flalign*}
+  E[\text{log} P(\mathbf{x} | \pi)|y,\pi_n] & =
+      E[x_1|y_1,\pi_n]\text{log}\Big(\frac{1}{2}\Big) +
+      E[x_2|y_2,\pi_n]\text{log}\Big(\frac{\pi}{4}\Big) +
+      E[x_3|y_3,\pi_n]\text{log}\Big(\frac{1-\pi}{4}\Big) + \\
+      & ~~~~ E[x_4|y_4,\pi_n]\text{log}\Big(\frac{1-\pi}{4}\Big) +
+      E[x_5|y_5,\pi_n]\text{log}\Big(\frac{\pi}{4}\Big) \\
+  E[x_1 | y_1, \pi_n] & = P(x_1 | y_1, \pi_n) =
+      y_1\frac{\frac{1}{2}}{\frac{1}{2} + \frac{\pi_n}{4}}  \\
+  E[x_2 | y_1, \pi_n] & = P(x_2 | y_1, \pi_n) =
+          y_1\frac{\frac{\pi_n}{4}}{\frac{1}{2} + \frac{\pi_n}{4}}  \\
+  E[x_3 | y_2, \pi_n] & = P(x_3 | y_2, \pi_n) = y_2 \\
+  E[x_4 | y_3, \pi_n] & = P(x_4 | y_3, \pi_n) = y_3 \\
+  E[x_5 | y_4, \pi_n] & = P(x_5 | y_4, \pi_n) = y_4
+\end{flalign*}
+
+M step
+
+\begin{flalign*}
+  \mathcal{L}(\pi) &= x_1\text{log}(\frac{1}{2}) +
+      (x_2 + x_5) \text{log}(\frac{\pi}{4}) +
+      (x_3 + x_4) \text{log}(\frac{1-\pi}{4}) \\
+  \frac{d\mathcal{L}}{d\pi} &= \frac{x_2 + x_5}{\pi} - \frac{x_3 + x_4}{1-\pi} \\
+  \text{Set to zero} \dots \\
+  \frac{1-\pi}{\pi} & = \frac{x_3 + x_4}{x_2 + x_5} \\
+  \hat{\pi} &= \frac{x_2 + x_5}{x_2 + x_3 + x_4 + x_5}
+\end{flalign*}
+
 Considering four arbitrary positive counts, can the
 likelihood function of the above model for $\mathbf{y}$ have more than one local
 maximum?
+
+No, cannot have more than one maximum because log-likelihood is a strictly
+concave function and a linear function , so strictly concave in $\pi$ (can
+check seconed derivative to see this).
+
+\textbf{Code in appendix}
 
 \item Now consider a Bayesian analysis with a Be$(1,1)$ prior on
   $\pi$. Write out the details of an auxiliary variable scheme that
   samples $p(\mathbf{x}|\mathbf{y},\pi)$ and $p(\pi|\mathbf{x})$. Implement this algorithm
   for the given data.
+
+\begin{flalign*}
+  p(\pi|\mathbf{x}) & \propto
+      \Big(\frac{1}{2}\Big)^{x_1} \Big(\frac{\pi}{4}\Big)^{x_2+x_5}
+      \Big(\frac{1-\pi}{4}\Big)^{x_3 + x_4} \pi^{a-1}(1-\pi)^{b-1} \\
+  & \propto \pi^{x_2 + x_5 + a-1}(1-\pi)^{x_3 + x_4 + b} \\
+  & \propto \text{Beta}(x_2 + x_5 + a, x_3 + x_4 + b)
+\end{flalign*}
+
+To get needed complete data, sample from $p(x_1| \mathbf{y}, \pi)$ which is
+Binomial$(y_2, \frac{\frac{\pi}{4}}{\frac{1}{2} + \frac{\pi}{4}})$.
+
+\textbf{Code in appendix}
+
 \end{enumerate}
 
 \item In this problem you are asked to experiment with the
@@ -122,6 +184,40 @@ maximum?
     simulations.  Also be sure to set a seed for random number
     generation via the {\tt set.seed} command in order to be able to
     reproduce your simulation results.)
+
+After implementing our algorithm we generated simulations using the following
+code
+
+\begin{verbatim}
+simulate_run <- function(n){
+    params <- gen_params()
+    H <- rep(0, n)
+    H[1] <- sample(1:2, 1, prob=params$v) # initiate the start which is 50/50
+    for(i in 2:n){
+        H[i] <- sample(1:2, 1, prob=params$P[H[i-1],])
+    }
+    O <- sapply(1:n, function(i) sample(1:6, 1, prob=params$E[H[i],]))
+    return(list(O=O, H=H))
+}
+\end{verbatim}
+
+In order to test our implementation of the forward backward algorithm we first
+simulated a data set with 400 observations and calculated its likelihood. We
+then increased the number of observations simulated by 1 and repeated this
+process until we had numerical underflow and were returned probabilities of
+zero. This process was repeated 100 times. The median length simulation that
+returned zero probabilities was 423 with a minimum failure length of 416 and a
+max of 431. A histogram of the length of first observed failure is seen in
+Figure 1.
+
+\begin{figure}
+  \caption{Histogram of Length of First Failed Probability Estimate}
+  \centering
+    \includegraphics[width=0.4\textwidth]{./HistogramFailure.png}
+\end{figure}
+
+\textbf{Code in appendix}
+
   \item Modify your implementation from (a) to compute all
     probabilities on a log-scale using the fact
     \[
@@ -129,12 +225,26 @@ maximum?
     \]
     Does this resolve possible numerical issues with longer sequences
     when choosing $a$ to be the larger of any two summands?
+
+When using the log scale implementation we simulated data with 400 observations
+calculated the probability and then increased the count by 1 until we hit
+numerical underflow or were able to succesfully calculate the probability
+of an set of observation of length 1000. The log scale was able to solve the
+numerical issues and calculate the likelihood of an observation simulation of
+length 1000. Code is included in the appendix.
+
   \item Modify your implementation from (a) to work with rescaled
     probabilities as discussed in class/in the handout from the book
     by Bishop.  Does this resolve possible numerical issues with
     longer sequences?  Compare to your results in (b).
   \end{enumerate}
 
+When using the scaled implementation we simulated data with 400 observations
+calculated the probability and then increased the count by 1 until we hit
+numerical underflow or were able to succesfully calculate the probability
+of an set of observation of length 1000. The scaled approach was able to solve the
+numerical issues and calculate the likelihood of an observation simulation of
+length 1000. Code is included in the appendix.
 
 \item (Guttorp Exercise 2.14.D8) The data in Guttorp's data set 3
   consists of four years of hourly average wind directions a the
@@ -163,6 +273,332 @@ maximum?
   it after the homework is due.  (Zero points if you can't provide
   your own code when asked to email it or if the code does not give
   the results you described.)
+
+For our estimation of the emission probabilities for the two hidden states, 32 emission probabilities (16 for each hidden state) and
+the 2x2 transition matrix we used the scaled fowards backwards algorithm as
+part of our implementation of Baum Welch algorithm. The Baum Welch algorithm
+sequentially updates the transition probability matrix and and the emission
+probability matrix for a specified number of hidden states using
+$\gamma_t(i;\boldsymbol{\theta}_k) \equiv Pr(x_t = i | \mathbf{y}, \boldsymbol{\theta}_k)$ and
+$g_t(i,j;\boldsymbol{\theta}_k) = Pr(x_{t-1} = i, x_t = j | \mathbf{y}, \boldsymbol{\theta}_k)$
+where k indicates an iteration in the iterative Baum Welch process. The algorithm
+always provides an updated parameter set with an improved likelihood and can
+be terminated with the change in the likelihood reaches some small value
+$\epsilon$ which we set to be $10^{-9}$ or about $\text{exp(-20.72)}$. The Baum Welch algorithm does not
+gauruntee convergence to a global minimum and is susceptible to local minima.
+
+\begin{figure}
+  \caption{Change in Log-Likelihood of Parameters}
+  \centering
+    \includegraphics[width=0.4\textwidth]{./DeltaLogLik.png}
+\end{figure}
+
+Figure 2 shows the change in the likelihood over each iteration until we reach
+our $\epsilon$ value of about $\text{exp(-20.72)}$. Note that the figure has the
+y axis in log space. The model estimates a probability transition matrix for the two
+hidden states of
+
+\[
+P =
+\begin{bmatrix}
+    .96 & .04\\
+    .03 & .97\\
+\end{bmatrix}
+\]
+
+The model also appears to have created an emission matrix with distinct
+probabilities for the two hidden states as seen in the heat map Figure 3, with
+strongly different probabilties estimated for the emissions between the two
+hidden states, as indicated by the difference in the row colors in the heat map.
+
+
+\begin{figure}
+  \caption{Heat Map of Emission Probabilities For Two Hiddens States}
+  \centering
+  \includegraphics[width=0.4\textwidth]{./EmissionPrHeatMap.png}
+\end{figure}
+The model appears to seperate distinct seasonal patterns with differential
+probabilities of being in state 1 vs state 2. When we agregate the estimated
+hourly hidden states by month we see a strong pattern where the winter months
+have a low probability of being in hidden state 1 while the summer months have
+a relatively high probability. A plot of the aggregated monthly probabilities
+across all years is seen in Figure 4. Figures 5 and 6 show temporal chnages
+of probabilities of being in Hidden state 1 averaged over day and hour
+respectively. These figures show in finer detail the changes in state probability
+that occur during the year.
+
+\begin{figure}
+  \caption{Probability of Hidden State 1 Averaged Over Months}
+  \centering
+    \includegraphics[width=0.4\textwidth]{./ProbByMonth.png}
+\end{figure}
+
+\begin{figure}
+  \caption{Probability of Hidden State 1 Averaged Over Day}
+  \centering
+    \includegraphics[width=0.4\textwidth]{./ProbByDay.png}
+\end{figure}
+
+\begin{figure}
+  \caption{Probability of Hidden State 1 Averaged Over Hour}
+  \centering
+    \includegraphics[width=0.4\textwidth]{./ProbByHour.png}
+\end{figure}
+
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+~\\
+
+\emph{Code Appendix}
+
+\begin{verbatim}
+rm(list=ls())
+
+y<-c(125, 18, 20, 34)
+
+# EM
+
+pi <- 0; pi.next <- 0.5
+
+difference <- TRUE
+
+while(difference){
+
+    pi.next <- (y[1]*(pi/(pi+2))+y[4])/(y[1]*(pi/(pi+2))+sum(y[-1]))
+
+    difference <- abs(pi.next-pi)>0.0001
+
+    pi <- pi.next
+
+}
+
+#
+
+pi #0.6268
+
+# Gibbs
+
+nits <- 1e4
+
+my.chain <- matrix(0, nrow=nits, ncol=2)
+
+my.chain[1,1] <- 50
+
+for(i in 2:nits){
+
+    my.chain[i,2] <- rbeta(1,my.chain[(i-1),1]+y[4]+1, y[3]+y[2]+1)
+
+    my.chain[i,1] <- rbinom(1,y[1], my.chain[i,2]/(my.chain[i,2]+2))
+
+}
+
+#
+
+apply(my.chain[-c(1:1e3),], 2, mean)
+
+library(HMM)
+
+log_sum <- function(loga, logb){
+    loga_ <- ifelse(loga >= logb, loga, logb)
+    logb_ <- ifelse(loga >= logb, logb, loga)
+    loga_ + log1p(exp(logb_ - loga_))
+}
+
+# Function for generating the TP matrix, Emission matrix, and inital probs
+gen_params <- function(){
+    P <- matrix(c(.95, .1, .05, .9), 2, 2)
+    E <- matrix(c(rep(1/6, 6), rep(.1, 5), .5), 2, 6, byrow=T)
+    v <- c(.5, .5)
+    return(list(P=P, E=E, v=v))
+}
+
+params <- gen_params()
+
+# Build a Markov object to test our implementation vs a known functional one
+HMMobj <- initHMM(1:2, 1:6, params$v, params$P, params$E)
+
+# Function for simulating undelying and obsrved values
+simulate_run <- function(n){
+    params <- gen_params()
+    H <- rep(0, n)
+    H[1] <- sample(1:2, 1, prob=params$v) # initiate the start which is 50/50
+    for(i in 2:n){
+        H[i] <- sample(1:2, 1, prob=params$P[H[i-1],])
+    }
+    O <- sapply(1:n, function(i) sample(1:6, 1, prob=params$E[H[i],]))
+    return(list(O=O, H=H))
+}
+
+# algorithm implementations
+forward_algorithm <- function(obs, log_, scale_=FALSE){
+    n <- length(obs)
+    params <- gen_params()
+    prob_seq <- matrix(0, nrow=2, ncol=n)
+    prob_seq[,1] <- params$v * params$E[,obs[1]]
+    if(log_){
+        lP <- log(params$P)
+        prob_seq[,1] <- log(prob_seq[,1])
+        for(i in 2:n){
+            prob_seq[,i] <- log(params$E[,obs[i]]) +
+                apply(lP + prob_seq[,i-1], 2, function(x) log_sum(x[1], x[2]))
+        }
+        prob_seq <- cbind(log(params$v), prob_seq)
+    }
+    else{
+        if(scale_){
+            prob_seq[,1] <- prob_seq[,1] / sum(prob_seq[,1])
+        }
+        for(i in 2:n){
+            prob_seq[,i] <- params$E[,obs[i]] * c(prob_seq[,i-1] %*% params$P)
+            if(scale_){
+                prob_seq[,i] <- prob_seq[,i] / sum(prob_seq[,i])
+            }
+        }
+        prob_seq <- cbind(params$v, prob_seq)
+    }
+    return(prob_seq)
+}
+
+backward_algorithm <- function(obs, log_, scale_=FALSE){
+    n <- length(obs)
+    params <- gen_params()
+    prob_seq <- matrix(0, nrow=2, ncol=n+1)
+    prob_seq[,n+1] <- c(1, 1)
+    if(log_){
+        lP <- t(log(params$P))
+        prob_seq[,n+1] <- log(prob_seq[,n+1])
+        for(i in n:1){
+            temp <- prob_seq[,i+1] + log(params$E[,obs[i]])
+            prob_seq[,i] <- apply(lP + temp, 2, function(x) log_sum(x[1], x[2]))
+        }
+    }
+    else{
+        for(i in n:1){
+            prob_seq[,i] <-
+                c((prob_seq[,i+1] * params$E[,obs[i]]) %*% t(params$P))
+            if(scale_){
+                prob_seq[,i] <- prob_seq[,i] / sum(prob_seq[,i])
+            }
+        }
+    }
+    return(prob_seq)
+}
+
+fb_algorithm <- function(obs, log_, scale_=FALSE){
+    forward_probs <- forward_algorithm(obs, log_, scale_)
+    backward_probs <- backward_algorithm(obs, log_, scale_)
+    if(log_){
+        n <- length(obs) + 1
+        mult <- forward_probs + backward_probs
+        colSum <- apply(mult, 2, function(x) log_sum(x[1], x[2]))
+        results <- sapply(1:n, function(x) mult[,x] - colSum[x])
+    }
+    else{
+        mult <- forward_probs * backward_probs
+        results <- apply(mult, 2, function(x) x / sum(x))
+    }
+    return(results)
+}
+
+set.seed(124)
+# First We ant to test to make sure our implementation returns the same result
+# as the known working implementation
+sims1 <- simulate_run(10) # simulate values
+(log_forward_prob_package <- forward(HMMobj, sims1$O)) # calc log probs using HMM
+(forward_prob_package <- exp(log_forward_prob_package)) # exponentiate to get raw probs
+(log_forward_prob_self <- forward_algorithm(sims1$O, log_=T))
+(forward_prob_self <- forward_algorithm(sims1$O, log_=F)) # run our function
+all.equal(c(forward_prob_package), c(forward_prob_self[,-1])) # test for similarity
+all.equal(c(log_forward_prob_package), c(log_forward_prob_self[,-1]))
+
+# looks like ourforward algorithm works
+
+# Run the same process with the backwards algorithm
+log_backward_prob_package <- backward(HMMobj, sims1$O)
+backward_prob_package <- exp(log_backward_prob_package)
+backward_prob_self <- backward_algorithm(sims1$O, log_=FALSE)
+log_backward_prob_self <- backward_algorithm(sims1$O, log_=TRUE)
+all.equal(c(log_backward_prob_package), c(log_backward_prob_self[,-1]))
+all.equal(c(backward_prob_package), c(backward_prob_self[,-1]))
+
+# Now check if the log, original, and scaled algorithms include the same results
+# for the forward-backward algorithm
+all.equal(c(fb_algorithm(sims1$O, log_=F)),
+          c(exp(fb_algorithm(sims1$O, log_=T))))
+all.equal(c(fb_algorithm(sims1$O, log_=F)),
+          c(fb_algorithm(sims1$O, log_=F, scale_=T)))
+
+# All three algorithms give the same results at the end
+
+# now we want to keep running our model until we get nonsensical prob estimates
+# on average how large of a model do we fail on for the basic algorithm?
+fail_counts <- 100
+fail_obs <- rep(0, fail_counts)
+
+for(i in 1:fail_counts){
+    trail_length <- 400
+    success <- TRUE
+    while(success){
+        trail_length <- trail_length + 1
+        fail <- any(is.na(log(fb_algorithm(simulate_run(trail_length)$O, F))))
+        success <- !fail
+    }
+    fail_obs[i] <- trail_length
+    print(paste0("Finished trail number ", i, "!!!"))
+}
+
+# histogram of size of first noticed failed observation
+png("./HistogramFailure.png")
+hist(fail_obs, nclass=20, main="First Failed Observation Length for 100 Trails",
+     xlab="Length")
+dev.off()
+
+# now try in log space
+fail_counts <- 100
+fail_obs <- rep(0, fail_counts)
+for(i in 1:fail_counts){
+    trail_length <- 400
+    success <- TRUE
+    while(success){
+        if(trail_length > 1000){
+            break
+        }
+        trail_length <- trail_length + 1
+        fail <- any(is.na(fb_algorithm(simulate_run(trail_length)$O, T)))
+        success <- !fail
+    }
+    if(trail_length > 1000){
+        print("Models are not failing to evaluate up to around length 1000!")
+        break
+    }
+    fail_obs[i] <- trail_length
+}
+
+# doesnt look like its breaking anymore with the log transform lets try scaled
+fail_counts <- 100
+fail_obs <- rep(0, fail_counts)
+for(i in 1:fail_counts){
+    trail_length <- 400
+    success <- TRUE
+    while(success){
+        if(trail_length > 1000){
+            break
+        }
+        trail_length <- trail_length + 1
+        fail <- any(is.na(log(fb_algorithm(simulate_run(trail_length)$O, F, T))))
+        success <- !fail
+    }
+    if(trail_length > 1000){
+        print("Models are not failing to evaluate up to around length 1000!")
+        break
+    }
+    fail_obs[i] <- trail_length
+}
+\end{verbatim}
 
 \end{enumerate}
 

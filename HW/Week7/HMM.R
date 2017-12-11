@@ -151,7 +151,10 @@ for(i in 1:fail_counts){
 }
 
 # histogram of size of first noticed failed observation
-hist(fail_obs, nclass=20, main="First Failed Observation Length of 100 Trails")
+png("./HistogramFailure.png")
+hist(fail_obs, nclass=20, main="First Failed Observation Length for 100 Trails",
+     xlab="Length")
+dev.off()
 
 # now try in log space
 fail_counts <- 100
