@@ -1,0 +1,64 @@
+# Hidden Markov Model
+
+Lets say that you want to be able to evaluate the likelihood of some set of parameters for hidden markov model $\theta = \{P, E, v \}$ given that you have some data $\mathbf{y}$. We want to compute $\mathcal{L}(\theta|\mathbf{y})$. In order to do this we need a strategy of evaluating the probabilities of hidden states given the sequences of data that we observe and since we do not know any of the underlying states $x$ we need to use the full data set to best evaluate the probability.
+
+## Forwards probabilities  
+A good starting point is to calculate what we call the forwards probabilities. Lets say that we have a scenario where there are two hidden states for a dice. The dice is either fair or unfair and the probability of the dice transitioning from fair to unfair is described by the probability transition matrix. We never know if we are dealing with the fair or unfair die, this is the hidden state, but we observe outcomes of the dice. For this, situation we are going to say that we know the probability transition matrix and and the emission matrix and they are  
+
+$$
+P =
+\begin{bmatrix}
+    \frac{19}{20} & \frac{1}{20}\\
+    \frac{1}{10} & \frac{9}{10}\\
+\end{bmatrix} \\
+\\
+E = 
+\begin{bmatrix}
+    \frac{1}{6} & \frac{1}{6} & \frac{1}{6} & \frac{1}{6} & \frac{1}{6} & \frac{1}{6} \\
+    \frac{1}{10} & \frac{1}{10} & \frac{1}{10} & \frac{1}{10} & \frac{1}{10} & \frac{1}{2} \\
+\end{bmatrix} \\
+$$
+
+For the sake ov the implementation of the model we will also define $v$ as the vector of starting probabilities, that is before we observe any data the probability that we have a fair or loaded die at the begining of the experiment. $v = [\frac{1}{2}, \frac{1}{2}]$. Now that we have our parameters defined we can evaluate $p(\mathbf{y})$ when we are given data. Lets say that we observe three die rolls and they are $\mathbf{y} = [5, 2, 6]$. How we estimate $p(\mathbf{y})$, isnt immeadiately intuitive. What is more intuitive however is how to calculate something like $p(y_1 , x_1=\text{Fair}| \theta)$.
+
+$$
+\begin{aligned}
+  p(y_1=5 , x_1=\text{Fair}| \theta) & = a_1(X_1=\text{Fair}) \\
+  & = P(v^{\star}=\text{Fair}) P(Y_1=5|X_1=\text{Fair}) \\
+  & = \frac{1}{2} \times \frac{1}{6} = \frac{1}{12}
+\end{aligned}
+$$
+
+Where $v^{\star}$ is the actual starting state of the die. Calculating $p(y_1 , x_1=\text{Loaded}| \theta)$, alternatively expressed $a_1(X_1=\text{Loaded})$, is pretty trivial.
+
+$$
+\begin{aligned}
+  p(y_1=5 | x_1=\text{Loaded}, \theta) & = a_1(X_1=\text{Loaded}) \\
+  & = P(v^{\star}=\text{Loaded}) P(Y_1=5|X_1=\text{Loaded}) \\
+  & = \frac{1}{2} \times \frac{1}{10} = \frac{1}{20}
+\end{aligned}
+$$
+
+Now how do we calulate $a_2(x_2)$, or $p(y_2, x_2,|\theta)$? Well since we know that the Hidden States follow a markov process, all we need to do is consider $x_1$ and the rest of the sequence can be considered conditionally independent. To generalize when we look at a state $x_n$ in the forwards probability algorithm, all we need to do is consider $x_{n-1}$. The probability for $a_2(x_2=\text{Fair})$ then becomes 
+
+$$
+\begin{aligned}
+  p(y_2=2 , x_2=\text{Fair}| \theta) & = a_2(x_2=\text{Fair}) \\
+  & = P(y_2=2|x_2=\text{Fair}) \sum_{s \in S} a_1(x_1=s)p(x_2=\text{Fair}|x_1=s)\\
+  & = \frac{1}{2} (\frac{1}{12}\times\frac{19}{20} + \frac{1}{20}\times\frac{1}{10}) \\
+  & \approx .04208
+\end{aligned}
+$$
+
+where $S$ is the set of all states, in our case $S=${Fair, Loaded}.
+
+With this approach we can easliy caluclate the entire sequince in the same manner and have the entire sequence for $p(y_i|x_{1:i})$ up until the last point. Lets demonstrate $a_2(x_2=\text{Loaded})$ just for clairty sake.
+
+$$
+\begin{aligned}
+  p(y_2=2, x_2=\text{Loaded}| \theta) & = a_2(x_2=\text{Loaded}) \\
+  & = P(y_2=2|x_2=\text{Loaded}) \sum_{s \in S} a_1(x_1=s)p(x_2=\text{Loaded}|x_1=s)\\
+  & = \frac{1}{10} (\frac{1}{12}\times\frac{1}{20} + \frac{1}{20}\times\frac{9}{10}) \\
+  & \approx .00492
+\end{aligned}
+$$
